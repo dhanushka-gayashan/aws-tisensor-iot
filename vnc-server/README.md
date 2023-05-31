@@ -24,4 +24,8 @@ sudo systemctl stop vncserver-x11-serviced.service
 5. **start** the VNC server
 ```bash
 sudo systemctl start vncserver-x11-serviced.service
-``` 
+```
+
+6. Connect with Raspberry Pi OS Desktop
+   1. **Install** and **Open** `VNC VIEWER` application on your computer
+   2. Use `dhanuiot:5900` to connect
