@@ -1,4 +1,5 @@
-## Configure Raspberry Pi
+## Configure Raspberry Pi Device
+
 1. Install Raspberry Pi Manager
    1. Go to [Raspberrypi Software Page](https://www.raspberrypi.com/software/)
    2. Download and install Raspberry Pi Manager
@@ -39,10 +40,12 @@
 5. Plug the Raspberry Pi Device into electricity. You can use **Ubiquiti WiFiman** iPhone App to get the IP of the Raspberry Pi Device
 <br><br>
 
-6. Login to Raspberry Pi Device
-   1. Open the Terminal on your computer
-   2. Execute the following command to `SSH` into Raspberry Pi Device
-      ```shell
-      ssh dhanu@dhanuiot
-      ```  
-         
+6. **Login** to Raspberry Pi Device
+```shell
+ssh dhanu@dhanuiot
+```
+
+7. **Update all packages** of Raspberry Pi OS
+```shell
+sudo apt-get update
+```
