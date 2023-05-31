@@ -37,15 +37,22 @@
 4. Remove the SD Card from Card-Reader and Insert into Raspberry Pi Device
 <br><br>
 
-5. Plug the Raspberry Pi Device into electricity. You can use **Ubiquiti WiFiman** iPhone App to get the IP of the Raspberry Pi Device
+5. Plug the Raspberry Pi Device into electricity.
 <br><br>
 
 6. **Login** to Raspberry Pi Device
 ```shell
-ssh dhanu@dhanuiot
+ssh admin@dhanuiot
 ```
 
 7. **Update all packages** of Raspberry Pi OS
 ```shell
 sudo apt-get update
 ```
+
+8. ** TODO ** - Configure Phone Hotspot
+<br><br>
+
+9. Find IP address of the Raspberry Pi Device
+   1. Option 01: Use **Ubiquiti WiFiman** iPhone App to get the IP of the Raspberry Pi Device
+   2. Option 02: Run `hostname I` on device terminal
