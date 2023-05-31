@@ -1,2 +1,6 @@
-# aws-tisensor-iot
-generate data from Ti Sersor and process on AWS
+# AWS - Ti Sensor - IOT
+Purpose: Generate data from Ti Sensor and process on AWS
+
+## Setup Instruction
+1. Follow the instruction in **raspberry-pi/README.md**
+2. 
