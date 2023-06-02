@@ -25,3 +25,10 @@ terraform apply -auto-approve
 ```shell
 terraform destroy -auto-approve
 ```
+
+5. `Clean` **Environment**
+```shell
+rm -rf .terraform
+rm -rf *.hcl
+rm -rf *.tfstate*
+```

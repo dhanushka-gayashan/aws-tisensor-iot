@@ -64,11 +64,11 @@ if (msg.topic === "sensorTag/pressure") {
 
 ![MQTT](./pics/05-01-mqttout.png)
 
-- Configure `AWS IOT Core` details
+- Configure `AWS IOT Core` details (AWS IOT Core Broker URL is available at terraform output)
 
 ![MQTT](./pics/05-02-mqttout.png)
 
-- Configure `Certificates` (Generated via Terraform)
+- Configure `Certificates` (Generated via Terraform and available at 05-setup-aws/certs)
 
 ![MQTT](./pics/05-03-mqttout.png)
 
