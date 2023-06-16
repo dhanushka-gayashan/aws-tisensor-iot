@@ -119,3 +119,11 @@ Desktop.ini
 *~
 .merge_file*
 lintcache
+
+###################
+# Diagrams
+##################
+*.drawio
+
+
+
