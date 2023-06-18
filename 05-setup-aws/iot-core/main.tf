@@ -1,3 +1,21 @@
+##################
+# IOT-CORE THING #
+##################
+
+resource "random_id" "thing_id" {
+  byte_length = 8
+}
+
+# create thing
+resource "aws_iot_thing" "thing" {
+  name = "sensortag_${random_id.thing_id.hex}"
+}
+
+
+########################
+# IOT-CORE CERTIFICATE #
+########################
+
 # generate and assign private key
 resource "tls_private_key" "key" {
   algorithm   = "RSA"
@@ -47,4 +65,46 @@ resource "local_file" "certificate" {
 resource "local_file" "ca" {
   content  = data.http.root_ca.response_body
   filename = "./certs/AmazonRootCA1.pem"
+}
+
+
+###################
+# IOT-CORE POLICY #
+###################
+
+# create and attache policy
+resource "random_id" "policy_id" {
+  byte_length = 8
+}
+
+resource "aws_iot_policy" "policy" {
+  name = "thingpolicy_${random_id.policy_id.hex}"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "iot:*",
+        ]
+        Effect   = "Allow"
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iot_policy_attachment" "attachment" {
+  policy = aws_iot_policy.policy.name
+  target = aws_iot_certificate.cert.arn
+}
+
+
+#####################
+# IOT-CORE ENDPOINT #
+#####################
+
+# export
+data "aws_iot_endpoint" "iot_endpoint" {
+  endpoint_type = "iot:Data-ATS"
 }

@@ -16,18 +16,6 @@ resource "aws_iam_role" "iot_topic_rule_role" {
   assume_role_policy = data.aws_iam_policy_document.iot_topic_rule_assume_role.json
 }
 
-data "aws_iam_policy_document" "iam_policy_for_iot_topic_rule_dynamodb" {
-  statement {
-    effect    = "Allow"
-    actions   = [
-      "dynamodb:BatchWriteItem",
-      "dynamodb:PutItem",
-      "dynamodb:DescribeTable",
-    ]
-    resources = [aws_dynamodb_table.iot_inject_dynamodb.arn]
-  }
-}
-
 data "aws_iam_policy_document" "iam_policy_for_iot_topic_rule_firehose" {
   statement {
     effect    = "Allow"
@@ -39,11 +27,6 @@ data "aws_iam_policy_document" "iam_policy_for_iot_topic_rule_firehose" {
   }
 }
 
-resource "aws_iam_role_policy" "iam_policy_for_iot_topic_rule_dynamodb" {
-  name   = "iotTopicRuleDynamodbPolicy"
-  role   = aws_iam_role.iot_topic_rule_role.id
-  policy = data.aws_iam_policy_document.iam_policy_for_iot_topic_rule_dynamodb.json
-}
 
 resource "aws_iam_role_policy" "iam_policy_for_iot_rule_firehose" {
   name   = "iotRuleFirehosePolicy"
