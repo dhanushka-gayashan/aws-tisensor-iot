@@ -49,7 +49,7 @@ data "aws_iam_policy_document" "process_assume" {
   }
 }
 
-data "aws_iam_policy_document" "process_table" {
+data "aws_iam_policy_document" "process_read" {
   statement {
     effect  = "Allow"
     actions = [
@@ -62,7 +62,23 @@ data "aws_iam_policy_document" "process_table" {
       "dynamodb:DescribeStream",
       "dynamodb:ListStreams",
     ]
-    resources = [aws_dynamodb_table.output[*].arn]
+    resources = [
+      aws_dynamodb_table.raw.arn,
+      "${aws_dynamodb_table.raw.arn}/*"
+    ]
+  }
+}
+
+data "aws_iam_policy_document" "process_write" {
+  statement {
+    effect  = "Allow"
+    actions = [
+      "dynamodb:BatchWriteItem",
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem",
+      "dynamodb:DeleteItem",
+    ]
+    resources = values(aws_dynamodb_table.output)[*].arn
   }
 }
 
@@ -83,10 +99,16 @@ resource "aws_iam_role" "process" {
   assume_role_policy = data.aws_iam_policy_document.process_assume.json
 }
 
-resource "aws_iam_role_policy" "process_table" {
-  name   = "IotDataProcessLambdaTablePolicy"
+resource "aws_iam_role_policy" "process_read" {
+  name   = "IotDataProcessLambdaReadPolicy"
   role   = aws_iam_role.process.id
-  policy = data.aws_iam_policy_document.process_table.json
+  policy = data.aws_iam_policy_document.process_read.json
+}
+
+resource "aws_iam_role_policy" "process_write" {
+  name   = "IotDataProcessLambdaWritePolicy"
+  role   = aws_iam_role.process.id
+  policy = data.aws_iam_policy_document.process_write.json
 }
 
 resource "aws_iam_role_policy" "process_log" {
@@ -134,26 +156,26 @@ resource "aws_dynamodb_table" "raw" {
 resource "aws_dynamodb_table" "output" {
   for_each = local.outputs
 
-  name             = local.raw.name
-  billing_mode     = local.raw.billing_mode
-  read_capacity    = local.raw.read_capacity
-  write_capacity   = local.raw.write_capacity
-  hash_key         = local.raw.hash_key
-  range_key        = local.raw.range_key
+  name             = each.value.name
+  billing_mode     = each.value.billing_mode
+  read_capacity    = each.value.read_capacity
+  write_capacity   = each.value.write_capacity
+  hash_key         = each.value.hash_key
+  range_key        = each.value.range_key
 
   attribute {
-    name = local.raw.hash_key
+    name = each.value.hash_key
     type = "S"
   }
 
   attribute {
-    name = local.raw.range_key
+    name = each.value.range_key
     type = "S"
   }
 
   ttl {
-    enabled        = local.raw.ttl_enable
-    attribute_name = local.raw.ttl_attribute
+    enabled        = each.value.ttl_enable
+    attribute_name = each.value.ttl_attribute
   }
 }
 
@@ -206,4 +228,6 @@ resource "aws_iot_topic_rule" "dynamodb" {
     }
     role_arn = aws_iam_role.iot_topic_rule.arn
   }
+
+  depends_on = [aws_dynamodb_table.raw]
 }

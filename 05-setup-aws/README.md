@@ -1,34 +1,27 @@
 ## Provision AWS Resource with Terraform
 
-### Created Resources
-
-
 ### Terraform Commands
 1. `Initiate` **Terraform**
 ```shell
-terraform init
+make tf_init
 ```
 
 2. `Plan` **Terraform**
 ```shell
-terraform init -upgrade
-
-terraform plan
+make tf_plan
 ```
 
 3. `Apply` **Terraform**
 ```shell
-terraform apply -auto-approve
+make tf_apply
 ```
 
 4. `Destroy` **Terraform**
 ```shell
-terraform destroy -auto-approve
+make tf_destroy
 ```
 
 5. `Clean` **Environment**
 ```shell
-rm -rf .terraform
-rm -rf *.hcl
-rm -rf *.tfstate*
+make tf_clean
 ```
