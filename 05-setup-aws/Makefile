@@ -1,6 +1,9 @@
 tf_init:
 	terraform init
 
+tf_validate:
+	terraform validate
+
 tf_plan:
 	terraform init -upgrade
 	terraform plan

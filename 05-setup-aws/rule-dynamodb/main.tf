@@ -3,7 +3,7 @@
 #############
 
 # iot topic rule
-data "aws_iam_policy_document" "rule_assume" {
+data "aws_iam_policy_document" "iot_topic_rule_assume" {
   statement {
     effect  = "Allow"
     actions = ["sts:AssumeRole"]
@@ -14,7 +14,7 @@ data "aws_iam_policy_document" "rule_assume" {
   }
 }
 
-data "aws_iam_policy_document" "rule" {
+data "aws_iam_policy_document" "iot_topic_rule" {
   statement {
     effect  = "Allow"
     actions = [
@@ -27,14 +27,14 @@ data "aws_iam_policy_document" "rule" {
 }
 
 resource "aws_iam_role" "iot_topic_rule" {
-  name               = "IotTopicRuleRole"
-  assume_role_policy = data.aws_iam_policy_document.rule_assume.json
+  name               = "IotTopicRuleDynamodbRole"
+  assume_role_policy = data.aws_iam_policy_document.iot_topic_rule_assume.json
 }
 
 resource "aws_iam_role_policy" "iot_topic_rule" {
   name   = "IotTopicRuleDynamodbPolicy"
   role   = aws_iam_role.iot_topic_rule.id
-  policy = data.aws_iam_policy_document.rule.json
+  policy = data.aws_iam_policy_document.iot_topic_rule.json
 }
 
 # process lambda
@@ -218,7 +218,7 @@ resource "aws_lambda_event_source_mapping" "process" {
 resource "aws_iot_topic_rule" "dynamodb" {
   name        = local.rule.name
   description = local.rule.description
-  enabled     = local.rule.enabled
+  enabled     = var.enable
   sql         = local.rule.sql
   sql_version = local.rule.sql_version
 
@@ -229,5 +229,7 @@ resource "aws_iot_topic_rule" "dynamodb" {
     role_arn = aws_iam_role.iot_topic_rule.arn
   }
 
-  depends_on = [aws_dynamodb_table.raw]
+  depends_on = [
+    aws_dynamodb_table.raw
+  ]
 }

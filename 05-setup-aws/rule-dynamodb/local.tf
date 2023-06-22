@@ -85,7 +85,6 @@ locals {
   rule = {
     name        = "Dynamodb"
     description = "Iot Topic Rule for Dynamodb"
-    enabled     = true
     sql         = "SELECT * FROM 'aws/sensorTag'"
     sql_version = "2016-03-23"
   }

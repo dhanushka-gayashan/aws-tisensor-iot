@@ -1,0 +1,12 @@
+### Test API Endpoing ###
+POST https://api.iot.dhanuzone.com/mobile
+Content-Type: application/json
+
+{
+  "mobile": "+642102995529",
+  "uuid": "generate"
+}
+
+#########################
+
+
