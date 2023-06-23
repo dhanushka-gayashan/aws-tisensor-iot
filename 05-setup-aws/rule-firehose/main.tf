@@ -138,19 +138,19 @@ resource "aws_iam_role" "notification_lambda" {
 
 resource "aws_iam_role_policy" "notification_lambda_dynamodb" {
   name   = "IotFirehoseNotificationLambdaDynamodbPolicy"
-  role   = aws_iam_role.firehose.id
+  role   = aws_iam_role.notification_lambda.id
   policy = data.aws_iam_policy_document.notification_lambda_dynamodb.json
 }
 
 resource "aws_iam_role_policy" "notification_lambda_sqs" {
   name   = "IotFirehoseNotificationLambdaSQSPolicy"
-  role   = aws_iam_role.firehose.id
+  role   = aws_iam_role.notification_lambda.id
   policy = data.aws_iam_policy_document.notification_lambda_sqs.json
 }
 
 resource "aws_iam_role_policy" "notification_lambda_logs" {
   name   = "IotFirehoseNotificationLambdaLogsPolicy"
-  role   = aws_iam_role.firehose.id
+  role   = aws_iam_role.notification_lambda.id
   policy = data.aws_iam_policy_document.notification_lambda_logs.json
 }
 
@@ -409,7 +409,7 @@ data "aws_iam_policy_document" "glue_job_sqs" {
       "kms:Decrypt",
     ]
     resources = [
-      aws_sqs_queue.firehose["iot_sms"].arn
+      aws_sqs_queue.firehose["iot_notification"].arn
     ]
   }
 }
@@ -509,12 +509,14 @@ resource "aws_glue_job" "firehose" {
   command {
     script_location = "s3://${aws_s3_bucket.glue_job_bucket.bucket}/scripts/iot_firehose_job.py"
   }
-  glue_version      = "4.0"
-  timeout           = 600
+  glue_version = "4.0"
+  timeout      = 600
 
   default_arguments = {
-    "--file" = "TEST FILE"
-    "--sqs_url" = "TEST SQS URL"
+    "--region"  = local.glue_job.region
+    "--bucket"  = local.glue_job.bucket
+    "--file"    = "TEST FILE"
+    "--sqs_url" = local.glue_job.sqs_url
   }
 
   execution_property {
@@ -606,6 +608,10 @@ resource "aws_lambda_event_source_mapping" "sqs" {
   enabled          = each.value["enabled"]
   function_name    = each.key
   batch_size       = each.value["batch_size"]
+
+  depends_on = [
+    aws_lambda_function.firehose
+  ]
 }
 
 resource "aws_lambda_permission" "api_gateway" {

@@ -9,6 +9,7 @@ import (
 	"os"
 )
 
+var region string
 var jobName string
 var sqsUrl string
 
@@ -19,8 +20,7 @@ func handler(even events.S3Event) (*glue.StartJobRunOutput, error) {
 	response, err := glueClient.StartJobRun(&glue.StartJobRunInput{
 		JobName: aws.String(jobName),
 		Arguments: map[string]*string{
-			"--file":    aws.String(record.S3.Object.Key),
-			"--sqs_url": aws.String(sqsUrl),
+			"--file": aws.String(record.S3.Object.Key),
 		},
 	})
 	if err != nil {
@@ -31,9 +31,8 @@ func handler(even events.S3Event) (*glue.StartJobRunOutput, error) {
 }
 
 func main() {
-	region := os.Getenv("AWS_REGION")
+	region = os.Getenv("AWS_REGION")
 	jobName = os.Getenv("JOB_NAME")
-	sqsUrl = os.Getenv("SQS_URL")
 
 	awsSession, err := session.NewSession(&aws.Config{Region: aws.String(region)})
 	if err != nil {

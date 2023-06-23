@@ -56,29 +56,29 @@ locals {
 
   # lambdas
   lambda = {
-#    IotNotification = {
-#      file            = "./lambda/queue_notification/notification.zip"
-#      role            = aws_iam_role.notification_lambda.arn
-#      runtime         = "go1.x"
-#      handler         = "main"
-#      memory          = 128
-#      timeout         = 180
-#      concurrency     = 3
-#      api_integration = false
-#      sqs_integration = true
-#      sqs             = {
-#        arn         = aws_sqs_queue.firehose["iot_notification"].arn
-#        enabled     = true
-#        batch_size  = 1
-#      }
-#      s3_integration  = false
-#      s3 = {}
-#      env_vars        = {
-#        READ_SQS_URL = aws_sqs_queue.firehose["iot_notification"].url
-#        WRITE_SQS_URL = aws_sqs_queue.firehose["iot_sms"].url
-#        TABLE = aws_dynamodb_table.mobile.name
-#      }
-#    }
+    IotNotification = {
+      file            = "./lambda/queue_notification/notification.zip"
+      role            = aws_iam_role.notification_lambda.arn
+      runtime         = "go1.x"
+      handler         = "main"
+      memory          = 128
+      timeout         = 180
+      concurrency     = 3
+      api_integration = false
+      sqs_integration = true
+      sqs             = {
+        arn         = aws_sqs_queue.firehose["iot_notification"].arn
+        enabled     = true
+        batch_size  = 1
+      }
+      s3_integration  = false
+      s3 = {}
+      env_vars        = {
+        READ_SQS_URL = aws_sqs_queue.firehose["iot_notification"].url
+        WRITE_SQS_URL = aws_sqs_queue.firehose["iot_sms"].url
+        TABLE = aws_dynamodb_table.mobile.name
+      }
+    }
 
     IotSendSms = {
       file            = "./lambda/send_sms/sms.zip"
@@ -138,7 +138,6 @@ locals {
       }
       env_vars        = {
         JOB_NAME = aws_glue_job.firehose.name
-        SQS_URL  = aws_sqs_queue.firehose["iot_notification"].url
       }
     }
   }
@@ -151,6 +150,9 @@ locals {
   # glue job
   glue_job = {
     name = "iot_firehose_glue_job"
+    region = "us-east-1"
+    bucket = aws_s3_bucket.firehouse_landing_bucket.bucket
+    sqs_url = aws_sqs_queue.firehose["iot_notification"].url
   }
 
   # topic rule
