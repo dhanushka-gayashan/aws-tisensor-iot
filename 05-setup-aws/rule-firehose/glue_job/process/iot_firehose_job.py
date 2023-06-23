@@ -15,11 +15,11 @@ sqs_url = args['sqs_url']
 
 send_message = False
 
-# read parameters from SSM
+# TODO: read parameters from SSM
 
-# Load file from S3
+# TODO: Load file from S3
 
-# read the file and find require data
+# TODO: read the file and find require data
 # TODO: Remove
 send_message = True
 

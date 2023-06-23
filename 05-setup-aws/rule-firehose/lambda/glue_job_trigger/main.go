@@ -11,7 +11,6 @@ import (
 
 var region string
 var jobName string
-var sqsUrl string
 
 var glueClient *glue.Glue
 

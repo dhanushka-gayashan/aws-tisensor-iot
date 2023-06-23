@@ -77,14 +77,15 @@ locals {
         READ_SQS_URL = aws_sqs_queue.firehose["iot_notification"].url
         WRITE_SQS_URL = aws_sqs_queue.firehose["iot_sms"].url
         TABLE = aws_dynamodb_table.mobile.name
+        STATUS = "HIGH PRESSURE"
       }
     }
 
     IotSendSms = {
       file            = "./lambda/send_sms/sms.zip"
       role            = aws_iam_role.send_sms_lambda.arn
-      runtime         = "python3.9"
-      handler         = "sms.lambda_handler"
+      runtime         = "go1.x"
+      handler         = "main"
       memory          = 128
       timeout         = 180
       concurrency     = 3

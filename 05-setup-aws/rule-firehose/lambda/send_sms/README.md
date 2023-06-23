@@ -1,15 +1,19 @@
-#### Build package
+### Install require packages
+```shell
+make install
+```
+
+
+### Build executable package
 ```shell
 make build
 ```
 
 
-#### Test Payload - Send ***SMS SQS***
+#### Test Payload - Send ***SMS SEND SQS***
 ```json
 {
-  "Message": {
-    "mobile": "+642102995529",
-    "message": "HIGH PRESSURE"
-  }
+  "mobile": "+642102995529",
+  "message": "HIGH PRESSURE"
 }
 ```

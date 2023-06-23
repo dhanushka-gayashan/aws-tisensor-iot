@@ -13,6 +13,7 @@ make build
 #### Test Payload - Send ***NOTIFICATION SQS***
 ```json
 {
-  "message": "HIGH PRESSURE"
+  "message": "HIGH PRESSURE",
+  "date": "08:43AM on June 23, 2023"
 }
 ```
