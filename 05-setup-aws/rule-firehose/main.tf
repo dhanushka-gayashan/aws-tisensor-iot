@@ -490,45 +490,6 @@ resource "aws_ssm_parameter" "parameter" {
 }
 
 
-############
-# GLUE JOB #
-############
-
-# upload job script
-resource "aws_s3_object" "glue_job_script" {
-  bucket      = aws_s3_bucket.glue_job_bucket.bucket
-  key         = "scripts/iot_firehose_job.py"
-  source      = "${path.module}/glue_job/process/iot_firehose_job.py"
-  source_hash = filemd5("${path.module}/glue_job/process/iot_firehose_job.py")
-}
-
-# glue job
-resource "aws_glue_job" "firehose" {
-  name     = local.glue_job.name
-  role_arn = aws_iam_role.glue_job.arn
-  command {
-    script_location = "s3://${aws_s3_bucket.glue_job_bucket.bucket}/scripts/iot_firehose_job.py"
-  }
-  glue_version = "4.0"
-  timeout      = 600
-
-  default_arguments = {
-    "--region"  = local.glue_job.region
-    "--bucket"  = local.glue_job.bucket
-    "--file"    = "TEST FILE"
-    "--sqs_url" = local.glue_job.sqs_url
-  }
-
-  execution_property {
-    max_concurrent_runs = 200
-  }
-
-  number_of_workers = 10
-  worker_type       = "Standard"
-  max_retries       = 0
-}
-
-
 ##################
 # DYNAMODB TABLE #
 ##################
@@ -569,6 +530,45 @@ resource "aws_sqs_queue" "firehose" {
   content_based_deduplication = each.value.content_based_deduplication
   sqs_managed_sse_enabled     = each.value.sqs_managed_sse_enabled
   tags                        = each.value.tags
+}
+
+
+############
+# GLUE JOB #
+############
+
+# upload job script
+resource "aws_s3_object" "glue_job_script" {
+  bucket      = aws_s3_bucket.glue_job_bucket.bucket
+  key         = "scripts/iot_firehose_job.py"
+  source      = "${path.module}/glue_job/process/iot_firehose_job.py"
+  source_hash = filemd5("${path.module}/glue_job/process/iot_firehose_job.py")
+}
+
+# glue job
+resource "aws_glue_job" "firehose" {
+  name     = local.glue_job.name
+  role_arn = aws_iam_role.glue_job.arn
+  command {
+    script_location = "s3://${aws_s3_bucket.glue_job_bucket.bucket}/scripts/iot_firehose_job.py"
+  }
+  glue_version = "4.0"
+  timeout      = 600
+
+  default_arguments = {
+    "--region"  = local.glue_job.region
+    "--bucket"  = local.glue_job.bucket
+    "--file"    = "TEST FILE"
+    "--sqs_url" = local.glue_job.sqs_url
+  }
+
+  execution_property {
+    max_concurrent_runs = 200
+  }
+
+  number_of_workers = 10
+  worker_type       = "Standard"
+  max_retries       = 0
 }
 
 
