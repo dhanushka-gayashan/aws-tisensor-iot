@@ -72,16 +72,16 @@ if (msg.topic === "sensorTag/pressure") {
 
 ![MQTT](./pics/05-03-mqttout.png)
 
-### **DEPLOY** and **TEST** 
-- Click on **Deploy** Button
+### ***DEPLOY*** and ***TEST***
+- Click on ***Deploy*** Button
 <br><br>
 
-- `TEST`: Enable ***Debug* Node and check on **Debug Console**
+- `TEST`: Enable ***Debug*** Node and check on ***Debug Console***
   <br><br>
 
 - `AWS TEST`
-  1. Click on **MQTT test client**
-  2. **Subscribe** to the **MQTT TOPIC**
+  1. Click on ***MQTT test client***
+  2. ***Subscribe*** to the ***MQTT TOPIC***
   
   ![TEST](./pics/06-01-test.png)  
 

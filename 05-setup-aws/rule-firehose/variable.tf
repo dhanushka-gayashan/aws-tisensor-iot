@@ -4,6 +4,12 @@ variable "enable" {
   description = "enable or disable the rule"
 }
 
+variable "region" {
+  type = string
+  default = "us-east-1"
+  description = "AWS Region"
+}
+
 variable "hosted_zone_id" {
   type = string
   default = ""

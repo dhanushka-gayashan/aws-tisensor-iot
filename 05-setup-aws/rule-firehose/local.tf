@@ -151,7 +151,7 @@ locals {
   # glue job
   glue_job = {
     name = "iot_firehose_glue_job"
-    region = "us-east-1"
+    region = var.region
     bucket = aws_s3_bucket.firehouse_landing_bucket.bucket
     sqs_url = aws_sqs_queue.firehose["iot_notification"].url
   }
