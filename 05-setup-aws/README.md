@@ -1,3 +1,25 @@
+## Pre-Requisites
+1. ***AWS IAM Identity Center***
+   1. ***Enable*** `AWS IAM Identity Center`
+   2. ***Customize*** `AWS Access Portal URL`
+
+
+## Post-Requisites
+1. Configure ***IOT CORE Certificates*** in ***IOT Device*** 
+2. Enable/Verify SSO User: 
+   1. Login to AWS Console 
+   2. Go to and ***AWS IAM Identity Center***
+   3. Click on Created User's Name
+   4. Click on ***Send email verification link***
+   5. Login to provided email and active the User
+   6. Select ***Forgot Password*** option to ***Reset*** the password
+      - username = "grafana"
+      - password = "Grafana123!"
+
+
+## Follow the steps in `.rule-timestreamdb/dashboard/README.md` to create the ***Dashboard***
+
+
 ## Provision AWS Resource with Terraform
 
 ### Terraform Commands
