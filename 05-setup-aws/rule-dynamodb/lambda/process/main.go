@@ -149,10 +149,6 @@ func SaveData(data ReceiveData) error {
 		"humidity":      "IOTOutputHumidityTable",
 	}
 
-	fmt.Printf("%+v\n", data)
-	fmt.Println("PRINT X AND Y AND Z")
-	fmt.Println(data.Accelerometer)
-
 	var input *dynamodb.PutItemInput
 	if data.Pressure > 0 {
 		item := new(IntData)
@@ -200,8 +196,6 @@ func SaveData(data ReceiveData) error {
 			TableName: aws.String(outputTables["humidity"]),
 		}
 	} else if len(data.Accelerometer) > 0 {
-		fmt.Println("I AM Accelerometer Accelerometer Accelerometer Accelerometer Accelerometer Accelerometer")
-
 		item := new(MultiData)
 		item.Uuid = uuid2.New().String()
 		item.Timestamp = data.Timestamp
@@ -219,9 +213,6 @@ func SaveData(data ReceiveData) error {
 			TableName: aws.String(outputTables["accelerometer"]),
 		}
 	} else if len(data.Gyroscope) > 0 {
-
-		fmt.Println("I AM Gyroscope Gyroscope Gyroscope Gyroscope Gyroscope Gyroscope")
-
 		item := new(MultiData)
 		item.Uuid = uuid2.New().String()
 		item.Timestamp = data.Timestamp
@@ -239,9 +230,6 @@ func SaveData(data ReceiveData) error {
 			TableName: aws.String(outputTables["gyroscope"]),
 		}
 	} else if len(data.Magnetometer) > 0 {
-
-		fmt.Println("I AM Magnetometer Magnetometer Magnetometer Magnetometer Magnetometer Magnetometer")
-
 		item := new(MultiData)
 		item.Uuid = uuid2.New().String()
 		item.Timestamp = data.Timestamp
@@ -258,6 +246,10 @@ func SaveData(data ReceiveData) error {
 			Item:      av,
 			TableName: aws.String(outputTables["magnetometer"]),
 		}
+	} else {
+		fmt.Println("Error: Fail to save following payload")
+		fmt.Printf("%+v\n", data)
+		return nil
 	}
 
 	_, err := dynaClient.PutItem(input)
