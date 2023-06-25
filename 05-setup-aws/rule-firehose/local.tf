@@ -2,14 +2,14 @@ locals {
   # system manager parameters
   ssm_parameters = {
     pressure = {
-      name = "/iot/pressure"
+      name = "/iot/firehose/pressure"
       description = "maximum air pressure"
       type = "String"
       value = "13"
     }
 
     temperature = {
-      name = "/iot/temperature"
+      name = "/iot/firehose/temperature"
       description = "maximum air temperature"
       type = "String"
       value = "13"

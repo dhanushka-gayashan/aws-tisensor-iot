@@ -143,8 +143,8 @@ resource "aws_timestreamwrite_table" "sensor" {
   table_name    = local.table.name
 
   retention_properties {
-    memory_store_retention_period_in_hours  = 8
-    magnetic_store_retention_period_in_days = 7
+    memory_store_retention_period_in_hours  = local.table.memory_retention_hours
+    magnetic_store_retention_period_in_days = local.table.magnetic_retention_days
   }
 }
 
@@ -205,8 +205,12 @@ resource "aws_iot_topic_rule" "iot_topic_rule_firehose" {
     table_name    = aws_timestreamwrite_table.sensor.table_name
     role_arn      = aws_iam_role.iot_topic_rule.arn
     dimension {
-      name  = "type"
-      value = "$${type}"
+      name  = "device_label"
+      value = "$${device_label}"
+    }
+    dimension {
+      name  = "location"
+      value = "$${location}"
     }
   }
 

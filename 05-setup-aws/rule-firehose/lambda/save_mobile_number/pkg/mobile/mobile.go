@@ -36,5 +36,6 @@ func SaveMobileNumber(req events.APIGatewayProxyRequest, tableName string, clien
 	if err != nil {
 		return nil, errors.New("could not dynamo put item")
 	}
+
 	return &mn, nil
 }

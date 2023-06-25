@@ -6,7 +6,7 @@ locals {
     read_capacity    = 1
     write_capacity   = 1
     hash_key         = "timestamp"
-    range_key        = "type"
+    range_key        = "location"
     stream_enabled   = true
     stream_view_type = "NEW_IMAGE"
     ttl_enable       = true
@@ -50,6 +50,17 @@ locals {
 
     magnetometer = {
       name           = "IOTOutputMagnetometerTable"
+      billing_mode   = "PROVISIONED"
+      read_capacity  = 1
+      write_capacity = 1
+      hash_key       = "uuid"
+      range_key      = "timestamp"
+      ttl_enable     = true
+      ttl_attribute  = "uuid"
+    }
+
+    temperature = {
+      name           = "IOTOutputTemperatureTable"
       billing_mode   = "PROVISIONED"
       read_capacity  = 1
       write_capacity = 1

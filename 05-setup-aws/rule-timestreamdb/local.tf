@@ -6,6 +6,8 @@ locals {
 
   table = {
     name = "sensor"
+    memory_retention_hours = 1
+    magnetic_retention_days = 1
   }
 
   # grafana
@@ -30,7 +32,7 @@ locals {
     name        = "Timestream"
     description = "Iot Topic Rule for Timestream"
     enabled     = var.enable
-    sql         = "SELECT * FROM 'aws/sensorTag'"
+    sql         = "SELECT pressure, accelerometer, gyroscope, magnetometer, temperature, humidity FROM 'aws/sensorTag'"
     sql_version = "2016-03-23"
   }
 }

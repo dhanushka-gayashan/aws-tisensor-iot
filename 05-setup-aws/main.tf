@@ -9,25 +9,27 @@ module "iot-core" {
   source = "./iot-core"
 }
 
-# TODO: iot-core: dynamodb rule
-#module "rule-dynamodb" {
-#  source = "./rule-dynamodb"
-#  enable = false
-#}
+# iot-core rule : dynamodb rule
+module "rule-dynamodb" {
+  source = "./rule-dynamodb"
+  enable = false
+}
 
-# TODO: iot-core: timestream rule -> CREATE GRAFANA PANELS ON GRAFANA
-#module "rule-timestream" {
-#  source = "./rule-timestreamdb"
-#  enable = true
-#}
+# TODO: iot-core rule : timestream rule -> CREATE GRAFANA DASHBOARD
+module "rule-timestream" {
+  source = "./rule-timestreamdb"
+  enable = false
+}
 
-# TODO: iot-core: firehose rule -> DEVELOP GLUE JOB
-#module "rule-firehose" {
-#  source = "./rule-firehose"
-#  enable = false
-#  region = var.region
-#  hosted_zone_id = data.aws_route53_zone.main.zone_id
-#}
+# TODO: iot-core rule : firehose rule -> DEVELOP GLUE JOB
+module "rule-firehose" {
+  source = "./rule-firehose"
+  region = var.region
+  hosted_zone_id = data.aws_route53_zone.main.zone_id
+  enable = false
+}
 
-
-
+module "rule-lambda" {
+  source = "./rule-lambda"
+  enable = false
+}

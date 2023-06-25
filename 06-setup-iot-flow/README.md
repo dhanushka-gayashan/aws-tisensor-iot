@@ -16,47 +16,32 @@
 ![Function](./pics/04-function.png)
 
 ```js
+var data = {
+  timestamp: new Date(),
+  location: "office",
+  device_label: "tisensor",
+  pressure: 0,
+  accelerometer: {},
+  gyroscope: {},
+  magnetometer: {},
+  temperature: 0.0,
+  humidity: 0.0
+}
+
 if (msg.topic === "sensorTag/pressure") {
-    return { 
-        payload: {
-            timestamp: new Date(),
-            type: "pressure",
-            data: msg.payload
-        }
-    };
+  data.pressure = msg.payload.pressure
 } else if (msg.topic === "sensorTag/accelerometer"){
-    return {
-        payload: {
-            timestamp: new Date(),
-            type: "accelerometer",
-            data: msg.payload
-        }
-    };
+  data.accelerometer = msg.payload
 } else if (msg.topic === "sensorTag/gyroscope") {
-    return {
-        payload: {
-            timestamp: new Date(),
-            type: "gyroscope",
-            data: msg.payload
-        }
-    };
+  data.gyroscope = msg.payload
 } else if (msg.topic === "sensorTag/magnetometer") {
-    return {
-        payload: {
-            timestamp: new Date(),
-            type: "magnetometer",
-            data: msg.payload
-        }
-    };
-} else if (msg.topic === "fsensorTag/humidity") {
-    return {
-        payload: {
-            timestamp: new Date(),
-            type: "humidity",
-            data: msg.payload
-        }
-    };
+  data.magnetometer = msg.payload
+} else if (msg.topic === "sensorTag/humidity") {
+  data.temperature = msg.payload.temperature
+  data.humidity = msg.payload.humidity
 };
+
+return { payload: data };
 ```
 
 ### Configure `mqttOut` Node
