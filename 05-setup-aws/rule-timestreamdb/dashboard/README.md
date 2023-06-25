@@ -40,3 +40,6 @@
 
 8. Set `Refresh to every 5s`
    ![Table View](08.png)
+
+
+### 3. Create Time Series
