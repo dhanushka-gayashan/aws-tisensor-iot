@@ -1,3 +1,11 @@
+########
+# DATA #
+########
+
+data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
+
+
 #############
 # IAM ROlES #
 #############
@@ -52,10 +60,6 @@ resource "aws_iam_role_policy" "iot_topic_rule_describe" {
 }
 
 # grafana workspace
-data "aws_caller_identity" "current" {}
-
-data "aws_region" "current" {}
-
 data "aws_iam_policy_document" "grafana_assume" {
   statement {
     effect  = "Allow"

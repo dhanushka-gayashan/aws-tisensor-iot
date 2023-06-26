@@ -18,33 +18,36 @@
 3. Follow the steps in `./rule-timestreamdb/dashboard/README.md` to create the ***Dashboard***
 
 
+## Create Sample Mobile Number
+Use `save_mobile_number.http` file
+
+
 ## Provision AWS Resource with Terraform
 
-## Terraform Commands
 1. `Initiate` **Terraform**
-```shell
-make tf_init
-```
+   ```shell
+   make tf_init
+   ```
 
 2. `Plan` **Terraform**
-```shell
-make tf_plan
-```
+   ```shell
+   make tf_plan
+   ```
 
 3. `Apply` **Terraform**
-```shell
-make tf_apply
-```
+   ```shell
+   make tf_apply
+   ```
 
 4. `Destroy` **Terraform**
-```shell
-make tf_destroy
-```
+   ```shell
+   make tf_destroy
+   ```
 
 5. `Clean` **Environment**
-```shell
-make tf_clean
-```
+   ```shell
+   make tf_clean
+   ```
 
 ## Sample Test Data
 

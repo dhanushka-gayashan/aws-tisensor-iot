@@ -1,3 +1,11 @@
+########
+# DATA #
+########
+
+data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
+
+
 #############
 # IAM ROlES #
 #############
@@ -414,6 +422,18 @@ data "aws_iam_policy_document" "glue_job_sqs" {
   }
 }
 
+data "aws_iam_policy_document" "glue_job_ssm" {
+  statement {
+    effect  = "Allow"
+    actions = [
+      "ssm:GetParameter"
+    ]
+    resources = [
+      "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/iot/firehose/*"
+    ]
+  }
+}
+
 data "aws_iam_policy_document" "glue_job_logs" {
   statement {
     effect  = "Allow"
@@ -443,6 +463,12 @@ resource "aws_iam_role_policy" "glue_job_sqs" {
   policy = data.aws_iam_policy_document.glue_job_sqs.json
 }
 
+resource "aws_iam_role_policy" "glue_job_ssm" {
+  name   = "IotFirehoseGlueJobPolicySSM"
+  role   = aws_iam_role.glue_job.id
+  policy = data.aws_iam_policy_document.glue_job_ssm.json
+}
+
 resource "aws_iam_role_policy" "glue_job_logs" {
   name   = "IotFirehoseGlueJobPolicyLog"
   role   = aws_iam_role.glue_job.id
@@ -463,9 +489,9 @@ resource "aws_s3_bucket" "firehouse_landing_bucket" {
 }
 
 
-##################
-# LANDING BUCKET #
-##################
+##########################
+# GLUE JOB SOURCE BUCKET #
+##########################
 
 resource "random_id" "glue_job_bucket" {
   byte_length = 8
@@ -560,6 +586,8 @@ resource "aws_glue_job" "firehose" {
     "--bucket"  = local.glue_job.bucket
     "--file"    = "TEST FILE"
     "--sqs_url" = local.glue_job.sqs_url
+    "--pressure_param" = local.glue_job.pressure_param
+    "--temperature_param" = local.glue_job.temperature_param
   }
 
   execution_property {

@@ -5,14 +5,14 @@ locals {
       name = "/iot/firehose/pressure"
       description = "maximum air pressure"
       type = "String"
-      value = "13"
+      value = "800"
     }
 
     temperature = {
       name = "/iot/firehose/temperature"
       description = "maximum air temperature"
       type = "String"
-      value = "13"
+      value = "18"
     }
   }
 
@@ -77,7 +77,6 @@ locals {
         READ_SQS_URL = aws_sqs_queue.firehose["iot_notification"].url
         WRITE_SQS_URL = aws_sqs_queue.firehose["iot_sms"].url
         TABLE = aws_dynamodb_table.mobile.name
-        STATUS = "HIGH PRESSURE"
       }
     }
 
@@ -154,6 +153,8 @@ locals {
     region = var.region
     bucket = aws_s3_bucket.firehouse_landing_bucket.bucket
     sqs_url = aws_sqs_queue.firehose["iot_notification"].url
+    pressure_param = aws_ssm_parameter.parameter["pressure"].name
+    temperature_param = aws_ssm_parameter.parameter["temperature"].name
   }
 
   # topic rule
