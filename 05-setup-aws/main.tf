@@ -21,7 +21,7 @@ module "rule-timestream" {
   enable = false
 }
 
-# TODO: iot-core rule : firehose rule -> DEVELOP GLUE JOB
+# iot-core rule : firehose rule
 module "rule-firehose" {
   source = "./rule-firehose"
   region = var.region
