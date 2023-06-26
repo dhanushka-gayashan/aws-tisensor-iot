@@ -45,7 +45,6 @@ func main() {
 	readSqsUrl = os.Getenv("READ_SQS_URL")
 	writeSqsUrl = os.Getenv("WRITE_SQS_URL")
 	table = os.Getenv("TABLE")
-	status = os.Getenv("STATUS")
 
 	awsSession, err := session.NewSession(&aws.Config{Region: aws.String(region)})
 	if err != nil {
@@ -64,23 +63,20 @@ func handler(ctx context.Context, event events.SQSEvent) {
 		fmt.Printf("Error: Cannot Unmarshal Data")
 	}
 
-	if rd.Message == status {
-		mobiles, err := getMobiles()
-		if err != nil {
-			fmt.Println("Error: Cannot fetch mobile list from dynamodb")
-			return
-		}
-
-		message := fmt.Sprintf("***WARNING*** | STATUS: %s | UPDATE: %s", rd.Message, rd.Date)
-
-		err = sendMessages(*mobiles, message)
-		if err != nil {
-			fmt.Println("Error: Cannot send messages to sqs")
-			return
-		}
+	mobiles, err := getMobiles()
+	if err != nil {
+		fmt.Println("Error: Cannot fetch mobile list from dynamodb")
+		return
 	}
 
-	_, err := sqsClient.DeleteMessage(&sqs.DeleteMessageInput{
+	message := fmt.Sprintf("***WARNING*** | STATUS: %s | UPDATE: %s", rd.Message, rd.Date)
+	err = sendMessages(*mobiles, message)
+	if err != nil {
+		fmt.Println("Error: Cannot send messages to sqs")
+		return
+	}
+
+	_, err = sqsClient.DeleteMessage(&sqs.DeleteMessageInput{
 		QueueUrl:      aws.String(readSqsUrl),
 		ReceiptHandle: aws.String(record.ReceiptHandle),
 	})
