@@ -31,5 +31,6 @@ module "rule-firehose" {
 
 module "rule-lambda" {
   source = "./rule-lambda"
-  enable = false
+  region = var.region
+  enable = true
 }
