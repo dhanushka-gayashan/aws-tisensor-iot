@@ -11,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -33,7 +34,7 @@ func Ping(ctx context.Context, event events.APIGatewayWebsocketProxyRequest) (ev
 	}
 
 	input := &dynamodb.PutItemInput{
-		TableName: aws.String("ws-messenger-table"),
+		TableName: aws.String(os.Getenv("DYNAMODB_TABLE")),
 		Item:      item,
 	}
 
