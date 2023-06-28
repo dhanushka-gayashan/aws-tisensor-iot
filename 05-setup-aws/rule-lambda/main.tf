@@ -103,19 +103,6 @@ data "aws_iam_policy_document" "publish_mgt_api" {
   }
 }
 
-#data "aws_iam_policy_document" "publish_execute_api" {
-#  statement {
-#    effect  = "Allow"
-#    actions = [
-#      "execute-api:Invoke",
-#    ]
-#    resources = [
-#      // TODO - Refeactor this
-#      "arn:aws:execute-api:us-east-1:516867159723:79fv7xraw3/prod/POST/@connections/tisensor"
-#    ]
-#  }
-#}
-
 data "aws_iam_policy_document" "publish_execute_api" {
   statement {
     effect  = "Allow"
