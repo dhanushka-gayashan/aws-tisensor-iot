@@ -34,5 +34,5 @@ module "rule-lambda" {
   source = "./rule-lambda"
   region = var.region
   hosted_zone_id = data.aws_route53_zone.main.zone_id
-  enable = true
+  enable = false
 }
