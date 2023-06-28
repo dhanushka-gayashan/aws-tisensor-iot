@@ -22,10 +22,10 @@ func Handler(ctx context.Context, event events.APIGatewayWebsocketProxyRequest) 
 		return handler.Connect(ctx, event)
 	case "$disconnect":
 		return handler.Disconnect(ctx, event)
-	case "PING":
-		return handler.Ping(ctx, event)
-	case "MESSAGE":
-		return handler.Message(ctx, event)
+	case "CHAT":
+		return handler.Chat(ctx, event)
+	case "BROADCAST":
+		return handler.Broadcast(ctx, event)
 	default:
 		return events.APIGatewayProxyResponse{Body: "no handler", StatusCode: 200}, nil
 	}

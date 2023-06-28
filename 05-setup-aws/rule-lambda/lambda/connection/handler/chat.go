@@ -15,10 +15,10 @@ import (
 	"time"
 )
 
-func Ping(ctx context.Context, event events.APIGatewayWebsocketProxyRequest) (events.APIGatewayProxyResponse, error) {
-	log.Print("ping message")
+func Chat(ctx context.Context, event events.APIGatewayWebsocketProxyRequest) (events.APIGatewayProxyResponse, error) {
+	log.Print("receive chat message")
 
-	const pongAction = "PONG"
+	const chatAction = "CHAT"
 
 	svc, err := helper.NewDynamoDB(ctx)
 	if err != nil {
@@ -43,7 +43,7 @@ func Ping(ctx context.Context, event events.APIGatewayWebsocketProxyRequest) (ev
 	}
 
 	response := model.Response[model.PongResponsePayload]{
-		Action:   pongAction,
+		Action:   chatAction,
 		Response: model.PongResponsePayload{},
 	}
 
@@ -52,7 +52,7 @@ func Ping(ctx context.Context, event events.APIGatewayWebsocketProxyRequest) (ev
 		return events.APIGatewayProxyResponse{}, err
 	}
 
-	log.Printf("pong response: %s", string(content))
+	log.Printf("chat response: %s", string(content))
 
 	return events.APIGatewayProxyResponse{
 		Body:       string(content),

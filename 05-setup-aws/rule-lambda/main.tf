@@ -33,7 +33,7 @@ data "aws_iam_policy_document" "connection_api" {
       "execute-api:*",
     ]
     resources = [
-      "${aws_apigatewayv2_stage.ws_messenger_api_stage.execution_arn}/*/*/*"
+      "${aws_apigatewayv2_stage.ws_iot.execution_arn}/*/*/*"
     ]
   }
 }
@@ -179,7 +179,7 @@ resource "aws_lambda_permission" "connection_invocation" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.connection.function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.ws_messenger_api_gateway.execution_arn}/*/*"
+  source_arn    = "${aws_apigatewayv2_api.ws_iot.execution_arn}/*/*"
 }
 
 ### ito rule publisher ###
@@ -197,16 +197,15 @@ resource "aws_lambda_permission" "connection_invocation" {
 ###############
 
 ### api gateway ###
-resource "aws_apigatewayv2_api" "ws_messenger_api_gateway" {
+resource "aws_apigatewayv2_api" "ws_iot" {
   name                       = local.api.name
   protocol_type              = "WEBSOCKET"
   route_selection_expression = "$request.body.action"
 }
 
-# TODO - Refactor the code
 ### resource integration ###
-resource "aws_apigatewayv2_integration" "ws_messenger_api_integration" {
-  api_id                    = aws_apigatewayv2_api.ws_messenger_api_gateway.id
+resource "aws_apigatewayv2_integration" "ws_iot" {
+  api_id                    = aws_apigatewayv2_api.ws_iot.id
   integration_type          = "AWS_PROXY"
   integration_uri           = aws_lambda_function.connection.invoke_arn
   credentials_arn           = aws_iam_role.api_gateway.arn
@@ -214,77 +213,77 @@ resource "aws_apigatewayv2_integration" "ws_messenger_api_integration" {
   passthrough_behavior      = "WHEN_NO_MATCH"
 }
 
-resource "aws_apigatewayv2_integration_response" "ws_messenger_api_integration_response" {
-  api_id                   = aws_apigatewayv2_api.ws_messenger_api_gateway.id
-  integration_id           = aws_apigatewayv2_integration.ws_messenger_api_integration.id
+resource "aws_apigatewayv2_integration_response" "ws_iot" {
+  api_id                   = aws_apigatewayv2_api.ws_iot.id
+  integration_id           = aws_apigatewayv2_integration.ws_iot.id
   integration_response_key = "/200/"
 }
 
-resource "aws_apigatewayv2_route" "ws_messenger_api_default_route" {
-  api_id    = aws_apigatewayv2_api.ws_messenger_api_gateway.id
+resource "aws_apigatewayv2_route" "ws_iot_default" {
+  api_id    = aws_apigatewayv2_api.ws_iot.id
   route_key = "$default"
-  target    = "integrations/${aws_apigatewayv2_integration.ws_messenger_api_integration.id}"
+  target    = "integrations/${aws_apigatewayv2_integration.ws_iot.id}"
 }
 
-resource "aws_apigatewayv2_route_response" "ws_messenger_api_default_route_response" {
-  api_id             = aws_apigatewayv2_api.ws_messenger_api_gateway.id
-  route_id           = aws_apigatewayv2_route.ws_messenger_api_default_route.id
+resource "aws_apigatewayv2_route_response" "ws_iot_default" {
+  api_id             = aws_apigatewayv2_api.ws_iot.id
+  route_id           = aws_apigatewayv2_route.ws_iot_default.id
   route_response_key = "$default"
 }
 
-resource "aws_apigatewayv2_route" "ws_messenger_api_connect_route" {
-  api_id    = aws_apigatewayv2_api.ws_messenger_api_gateway.id
+resource "aws_apigatewayv2_route" "ws_iot_connect" {
+  api_id    = aws_apigatewayv2_api.ws_iot.id
   route_key = "$connect"
-  target    = "integrations/${aws_apigatewayv2_integration.ws_messenger_api_integration.id}"
+  target    = "integrations/${aws_apigatewayv2_integration.ws_iot.id}"
 }
 
-resource "aws_apigatewayv2_route_response" "ws_messenger_api_connect_route_response" {
-  api_id             = aws_apigatewayv2_api.ws_messenger_api_gateway.id
-  route_id           = aws_apigatewayv2_route.ws_messenger_api_connect_route.id
+resource "aws_apigatewayv2_route_response" "ws_iot_connect" {
+  api_id             = aws_apigatewayv2_api.ws_iot.id
+  route_id           = aws_apigatewayv2_route.ws_iot_connect.id
   route_response_key = "$default"
 }
 
-resource "aws_apigatewayv2_route" "ws_messenger_api_disconnect_route" {
-  api_id    = aws_apigatewayv2_api.ws_messenger_api_gateway.id
+resource "aws_apigatewayv2_route" "ws_iot_disconnect" {
+  api_id    = aws_apigatewayv2_api.ws_iot.id
   route_key = "$disconnect"
-  target    = "integrations/${aws_apigatewayv2_integration.ws_messenger_api_integration.id}"
+  target    = "integrations/${aws_apigatewayv2_integration.ws_iot.id}"
 }
 
-resource "aws_apigatewayv2_route_response" "ws_messenger_api_disconnect_route_response" {
-  api_id             = aws_apigatewayv2_api.ws_messenger_api_gateway.id
-  route_id           = aws_apigatewayv2_route.ws_messenger_api_disconnect_route.id
+resource "aws_apigatewayv2_route_response" "ws_iot_disconnect" {
+  api_id             = aws_apigatewayv2_api.ws_iot.id
+  route_id           = aws_apigatewayv2_route.ws_iot_disconnect.id
   route_response_key = "$default"
 }
 
-resource "aws_apigatewayv2_route" "ws_messenger_api_ping_route" {
-  api_id    = aws_apigatewayv2_api.ws_messenger_api_gateway.id
-  route_key = "PING"
-  target    = "integrations/${aws_apigatewayv2_integration.ws_messenger_api_integration.id}"
+resource "aws_apigatewayv2_route" "ws_iot_chat" {
+  api_id    = aws_apigatewayv2_api.ws_iot.id
+  route_key = "CHAT"
+  target    = "integrations/${aws_apigatewayv2_integration.ws_iot.id}"
 }
 
-resource "aws_apigatewayv2_route_response" "ws_messenger_api_ping_route_response" {
-  api_id             = aws_apigatewayv2_api.ws_messenger_api_gateway.id
-  route_id           = aws_apigatewayv2_route.ws_messenger_api_ping_route.id
+resource "aws_apigatewayv2_route_response" "ws_iot_chat" {
+  api_id             = aws_apigatewayv2_api.ws_iot.id
+  route_id           = aws_apigatewayv2_route.ws_iot_chat.id
   route_response_key = "$default"
 }
 
-resource "aws_apigatewayv2_route" "ws_messenger_api_message_route" {
-  api_id    = aws_apigatewayv2_api.ws_messenger_api_gateway.id
-  route_key = "MESSAGE"
-  target    = "integrations/${aws_apigatewayv2_integration.ws_messenger_api_integration.id}"
+resource "aws_apigatewayv2_route" "ws_iot_broadcast" {
+  api_id    = aws_apigatewayv2_api.ws_iot.id
+  route_key = "BROADCAST"
+  target    = "integrations/${aws_apigatewayv2_integration.ws_iot.id}"
 }
 
-resource "aws_apigatewayv2_route_response" "ws_messenger_api_message_route_response" {
-  api_id             = aws_apigatewayv2_api.ws_messenger_api_gateway.id
-  route_id           = aws_apigatewayv2_route.ws_messenger_api_message_route.id
+resource "aws_apigatewayv2_route_response" "ws_iot_broadcast" {
+  api_id             = aws_apigatewayv2_api.ws_iot.id
+  route_id           = aws_apigatewayv2_route.ws_iot_broadcast.id
   route_response_key = "$default"
 }
 
 # TODO - Refactor the code
 ### deployment ###
-resource "aws_apigatewayv2_stage" "ws_messenger_api_stage" {
-  api_id      = aws_apigatewayv2_api.ws_messenger_api_gateway.id
-  name        = "develop"
+resource "aws_apigatewayv2_stage" "ws_iot" {
+  api_id      = aws_apigatewayv2_api.ws_iot.id
+  name        = "prod"
   auto_deploy = true
 }
 

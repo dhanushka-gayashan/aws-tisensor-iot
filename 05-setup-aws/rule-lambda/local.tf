@@ -21,7 +21,7 @@ locals {
     timeout         = 180
     concurrency     = 3
     env_vars        = {
-      "API_GATEWAY_ENDPOINT" = "https://${aws_apigatewayv2_api.ws_messenger_api_gateway.id}.execute-api.${var.region}.amazonaws.com/${aws_apigatewayv2_stage.ws_messenger_api_stage.id}"
+      "API_GATEWAY_ENDPOINT" = "https://${aws_apigatewayv2_api.ws_iot.id}.execute-api.${var.region}.amazonaws.com/${aws_apigatewayv2_stage.ws_iot.id}"
       "DYNAMODB_TABLE"       = aws_dynamodb_table.connection.id
     }
   }

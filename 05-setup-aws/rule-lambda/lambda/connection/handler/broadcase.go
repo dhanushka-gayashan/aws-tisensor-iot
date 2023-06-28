@@ -16,10 +16,10 @@ import (
 	"os"
 )
 
-func Message(ctx context.Context, event events.APIGatewayWebsocketProxyRequest) (events.APIGatewayProxyResponse, error) {
-	log.Print("new message")
+func Broadcast(ctx context.Context, event events.APIGatewayWebsocketProxyRequest) (events.APIGatewayProxyResponse, error) {
+	log.Print("receive broadcast message")
 
-	const messageAction = "MESSAGE"
+	const broadcastAction = "BROADCAST"
 
 	svc, err := helper.NewDynamoDB(ctx)
 	if err != nil {
@@ -31,9 +31,9 @@ func Message(ctx context.Context, event events.APIGatewayWebsocketProxyRequest) 
 		return events.APIGatewayProxyResponse{}, err
 	}
 
-	filt := expression.Name("ConnectionID").NotEqual(expression.Value(event.RequestContext.ConnectionID))
-	proj := expression.NamesList(expression.Name("ConnectionID"))
-	expr, err := expression.NewBuilder().WithFilter(filt).WithProjection(proj).Build()
+	filter := expression.Name("ConnectionID").NotEqual(expression.Value(event.RequestContext.ConnectionID))
+	projection := expression.NamesList(expression.Name("ConnectionID"))
+	expr, err := expression.NewBuilder().WithFilter(filter).WithProjection(projection).Build()
 	if err != nil {
 		return events.APIGatewayProxyResponse{}, err
 	}
@@ -66,7 +66,7 @@ func Message(ctx context.Context, event events.APIGatewayWebsocketProxyRequest) 
 		}
 
 		newMessage := model.Response[model.MessageRequestPayload]{
-			Action: messageAction,
+			Action: broadcastAction,
 			Response: model.MessageRequestPayload{
 				Message: request.Payload.Message,
 			},

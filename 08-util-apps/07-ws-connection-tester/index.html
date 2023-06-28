@@ -11,14 +11,15 @@
 
 <script>
     const ws = new WebSocket(
-        'wss://9e9aqaed77.execute-api.us-east-1.amazonaws.com/develop'
+        'wss://79fv7xraw3.execute-api.us-east-1.amazonaws.com/prod'
     );
     ws.onopen = () => console.log('opened');
     ws.onclose = () => console.log('closed');
 
     document.getElementById('sendMessage').onclick = () => {
         const message = {
-            action: 'MESSAGE',
+            action: 'BROADCAST',
+            // action: 'CHAT',
             payload: {
                 message: 'Random message'
             },
