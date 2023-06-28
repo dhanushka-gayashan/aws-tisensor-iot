@@ -29,10 +29,18 @@ module "rule-firehose" {
   enable = false
 }
 
-# TODO: Create React Application
-module "rule-lambda" {
-  source = "./rule-lambda"
+# iot-core rule : kinesis
+module "rule-kinesis" {
+  source = "./rule-kinesis"
   region = var.region
   hosted_zone_id = data.aws_route53_zone.main.zone_id
-  enable = false
+  enable = true
 }
+
+# TODO: Find how to acquire ws connection id for publish lambda
+#module "rule-lambda" {
+#  source = "./rule-lambda"
+#  region = var.region
+#  hosted_zone_id = data.aws_route53_zone.main.zone_id
+#  enable = false
+#}
