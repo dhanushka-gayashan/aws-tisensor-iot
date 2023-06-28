@@ -10,6 +10,40 @@ data "aws_region" "current" {}
 # IAM ROlES #
 #############
 
+# iot topic rule
+data "aws_iam_policy_document" "iot_topic_rule_assume" {
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["iot.amazonaws.com"]
+    }
+  }
+}
+
+data "aws_iam_policy_document" "iot_topic_rule" {
+  statement {
+    effect  = "Allow"
+    actions = [
+      "kinesis:PutRecord",
+      "kinesis:PutRecords",
+    ]
+    resources = [aws_kinesis_stream.stream.arn]
+  }
+}
+
+resource "aws_iam_role" "iot_topic_rule" {
+  name               = "IotTopicRuleKinesisRole"
+  assume_role_policy = data.aws_iam_policy_document.iot_topic_rule_assume.json
+}
+
+resource "aws_iam_role_policy" "iot_topic_rule" {
+  name   = "IotTopicRuleKinesisPolicy"
+  role   = aws_iam_role.iot_topic_rule.id
+  policy = data.aws_iam_policy_document.iot_topic_rule.json
+}
+
 # connection lambda
 data "aws_iam_policy_document" "connection_assume" {
   statement {
@@ -350,18 +384,36 @@ resource "aws_apigatewayv2_api_mapping" "ws_iot" {
 # TOPIC RULE #
 ##############
 
-#resource "aws_iot_topic_rule" "lambda" {
-#  name        = local.rule.name
-#  description = local.rule.description
-#  enabled     = local.rule.enabled
-#  sql         = local.rule.sql
-#  sql_version = local.rule.sql_version
-#
-#  lambda {
-#    function_arn = aws_lambda_function.publish.arn
-#  }
-#
-#  depends_on = [
-#    aws_lambda_function.publish
-#  ]
-#}
+resource "aws_kinesis_stream" "stream" {
+  name             = local.kinesis.name
+  shard_count      = local.kinesis.shard_count
+  retention_period = local.kinesis.retention_period
+
+  shard_level_metrics = [
+    "IncomingBytes",
+    "OutgoingBytes",
+  ]
+
+  stream_mode_details {
+    stream_mode = local.kinesis.stream_mode
+  }
+}
+
+
+##############
+# TOPIC RULE #
+##############
+
+resource "aws_iot_topic_rule" "kinesis_rule" {
+  name          = local.rule.name
+  description   = local.rule.description
+  enabled       = local.rule.enabled
+  sql           = local.rule.sql
+  sql_version   = local.rule.sql_version
+
+  kinesis {
+    role_arn        = aws_iam_role.iot_topic_rule.arn
+    stream_name     = aws_kinesis_stream.stream.name
+    partition_key   = local.rule.partition_key
+  }
+}

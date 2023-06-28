@@ -157,6 +157,12 @@ locals {
     temperature_param = aws_ssm_parameter.parameter["temperature"].name
   }
 
+  # kinesis firehose
+  firehose  = {
+    name        = "iot-topic-rule-firehose-stream"
+    destination = "extended_s3"
+  }
+
   # topic rule
   rule = {
     name        = "Firehose"

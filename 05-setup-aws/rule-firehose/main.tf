@@ -876,8 +876,8 @@ resource "aws_api_gateway_base_path_mapping" "api_gateway_domain" {
 #####################
 
 resource "aws_kinesis_firehose_delivery_stream" "stream" {
-  name        = "iot-topic-rule-firehose-stream"
-  destination = "extended_s3"
+  name        = local.firehose.name
+  destination = local.firehose.destination
 
   extended_s3_configuration {
     role_arn   = aws_iam_role.firehose.arn
