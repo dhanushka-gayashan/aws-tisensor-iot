@@ -1,3 +1,11 @@
+########
+# DATA #
+########
+
+data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
+
+
 #############
 # IAM ROlES #
 #############
@@ -73,6 +81,88 @@ resource "aws_iam_role_policy" "connection_log" {
   policy = data.aws_iam_policy_document.connection_log.json
 }
 
+# publish lambda
+data "aws_iam_policy_document" "publish_assume" {
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+  }
+}
+
+data "aws_iam_policy_document" "publish_mgt_api" {
+  statement {
+    effect  = "Allow"
+    actions = [
+      "apigatewaymanagementapi:PostToConnection",
+    ]
+    resources = ["*"]
+  }
+}
+
+#data "aws_iam_policy_document" "publish_execute_api" {
+#  statement {
+#    effect  = "Allow"
+#    actions = [
+#      "execute-api:Invoke",
+#    ]
+#    resources = [
+#      // TODO - Refeactor this
+#      "arn:aws:execute-api:us-east-1:516867159723:79fv7xraw3/prod/POST/@connections/tisensor"
+#    ]
+#  }
+#}
+
+data "aws_iam_policy_document" "publish_execute_api" {
+  statement {
+    effect  = "Allow"
+    actions = [
+      "execute-api:*",
+    ]
+    resources = [
+      "${aws_apigatewayv2_stage.ws_iot.execution_arn}/*/*/*"
+    ]
+  }
+}
+
+data "aws_iam_policy_document" "publish_log" {
+  statement {
+    effect  = "Allow"
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+    ]
+    resources = ["arn:aws:logs:*:*:*"]
+  }
+}
+
+resource "aws_iam_role" "publish" {
+  name               = "IotDataPublishLambdaRole"
+  assume_role_policy = data.aws_iam_policy_document.publish_assume.json
+}
+
+resource "aws_iam_role_policy" "publish_mgt_api" {
+  name   = "IotDataPublishLambdaManageApiPolicy"
+  role   = aws_iam_role.publish.id
+  policy = data.aws_iam_policy_document.publish_mgt_api.json
+}
+
+resource "aws_iam_role_policy" "publish_execute_api" {
+  name   = "IotDataPublishLambdaExecuteApiPolicy"
+  role   = aws_iam_role.publish.id
+  policy = data.aws_iam_policy_document.publish_execute_api.json
+}
+
+resource "aws_iam_role_policy" "publish_log" {
+  name   = "IotDataPublishLambdaLogPolicy"
+  role   = aws_iam_role.publish.id
+  policy = data.aws_iam_policy_document.publish_log.json
+}
+
 # api gateway
 data "aws_iam_policy_document" "api_gateway_assume" {
   statement {
@@ -131,10 +221,10 @@ resource "aws_iam_role_policy" "api_gateway_log" {
 
 resource "aws_dynamodb_table" "connection" {
   name           = local.connection.name
-  billing_mode     = local.connection.billing_mode
-  read_capacity    = local.connection.read_capacity
-  write_capacity   = local.connection.write_capacity
-  hash_key         = local.connection.hash_key
+  billing_mode   = local.connection.billing_mode
+  read_capacity  = local.connection.read_capacity
+  write_capacity = local.connection.write_capacity
+  hash_key       = local.connection.hash_key
 
   attribute {
     name = local.connection.hash_key
@@ -182,8 +272,38 @@ resource "aws_lambda_permission" "connection_invocation" {
   source_arn    = "${aws_apigatewayv2_api.ws_iot.execution_arn}/*/*"
 }
 
-### ito rule publisher ###
-# TODO
+### publish ###
+resource "aws_lambda_function" "publish" {
+  function_name    = local.publish.name
+  handler          = local.publish.handler
+  runtime          = local.publish.runtime
+  role             = aws_iam_role.publish.arn
+  filename         = "${path.module}/${local.publish.file}"
+  source_code_hash = filebase64sha256("${path.module}/${local.publish.file}")
+  memory_size      = local.publish.memory
+  timeout          = local.publish.timeout
+
+  environment {
+    variables = local.publish.env_vars
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_cloudwatch_log_group" "publish" {
+  name              = "/aws/lambda/${aws_lambda_function.publish.function_name}"
+  retention_in_days = 7
+}
+
+resource "aws_lambda_permission" "publish" {
+  statement_id  = "AllowExecutionFromIoTRule"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.publish.function_name
+  principal     = "iot.amazonaws.com"
+  source_arn    = aws_iot_topic_rule.lambda.arn
+}
 
 
 ###########################
@@ -338,4 +458,25 @@ resource "aws_apigatewayv2_api_mapping" "ws_iot" {
   api_id      = aws_apigatewayv2_api.ws_iot.id
   domain_name = aws_apigatewayv2_domain_name.ws_iot.id
   stage       = aws_apigatewayv2_stage.ws_iot.id
+}
+
+
+##############
+# TOPIC RULE #
+##############
+
+resource "aws_iot_topic_rule" "lambda" {
+  name        = local.rule.name
+  description = local.rule.description
+  enabled     = local.rule.enabled
+  sql         = local.rule.sql
+  sql_version = local.rule.sql_version
+
+  lambda {
+    function_arn = aws_lambda_function.publish.arn
+  }
+
+  depends_on = [
+    aws_lambda_function.publish
+  ]
 }

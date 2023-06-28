@@ -26,8 +26,30 @@ locals {
     }
   }
 
+  publish = {
+    name            = "IotRuleLambda"
+    file            = "./lambda/publish/publish.zip"
+    role            = aws_iam_role.publish.arn
+    runtime         = "go1.x"
+    handler         = "main"
+    memory          = 128
+    timeout         = 180
+    env_vars        = {
+      "API_GATEWAY_ENDPOINT" = "https://${aws_apigatewayv2_api.ws_iot.id}.execute-api.${var.region}.amazonaws.com/prod"
+    }
+  }
+
   # api gateway
   api = {
     name = "iot_ws_api_gateway"
+  }
+
+  # topic rule
+  rule = {
+    name        = "Lambda"
+    description = "Iot Topic Rule for Lambda"
+    enabled     = var.enable
+    sql         = "SELECT pressure, temperature, humidity FROM 'aws/sensorTag'"
+    sql_version = "2016-03-23"
   }
 }

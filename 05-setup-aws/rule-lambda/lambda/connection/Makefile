@@ -8,6 +8,7 @@ install:
 	go get github.com/aws/aws-sdk-go-v2/service/dynamodb
 
 
+
 clean:
 	rm -f main
 	rm -f connection.zip

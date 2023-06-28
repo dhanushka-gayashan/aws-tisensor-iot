@@ -29,6 +29,7 @@ module "rule-firehose" {
   enable = false
 }
 
+# TODO: Create React Application
 module "rule-lambda" {
   source = "./rule-lambda"
   region = var.region
