@@ -1,7 +1,7 @@
 locals {
   # dynamodb table
   connection = {
-    name             = "IOTConnectionIdTable"
+    name             = "IOTWSConnectionTable"
     billing_mode     = "PROVISIONED"
     read_capacity    = 1
     write_capacity   = 1
