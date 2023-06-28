@@ -44,8 +44,8 @@ locals {
     name          = "Kinesis"
     description   = "Iot Topic Rule for Kinesis"
     enabled       = var.enable
-    sql           = "SELECT timestamp, pressure, temperature, humidity FROM 'aws/sensorTag'"
+    sql           = "SELECT device_label, pressure, temperature, humidity FROM 'aws/sensorTag'"
     sql_version   = "2016-03-23"
-    partition_key = "timestamp"
+    partition_key = "device_label"
   }
 }
