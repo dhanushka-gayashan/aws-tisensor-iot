@@ -4,7 +4,7 @@ make install
 ```
 
 
-### Build executable package
+### Run Locally
 ```shell
-make build
+make run
 ```

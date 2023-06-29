@@ -1,28 +1,44 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/kinesis"
+	"github.com/gorilla/websocket"
+	"log"
 	"time"
 )
 
-func readFromKinesisStream(ch chan string, region string, streamName string, shardId string) {
+type MessageRequestPayload struct {
+	Action  string `json:"action"`
+	Payload struct {
+		Message map[string]string `json:"message"`
+	} `json:"payload"`
+}
+
+func (m *MessageRequestPayload) SetData(action string, pressure int64, temperature, humidity float64) {
+	m.Action = action
+	m.Payload.Message = make(map[string]string)
+	m.Payload.Message["pressure"] = fmt.Sprintf("%d", pressure)
+	m.Payload.Message["temperature"] = fmt.Sprintf("%.2f", temperature)
+	m.Payload.Message["humidity"] = fmt.Sprintf("%.2f", humidity)
+}
+
+func readFromKinesisStream(ch chan MessageRequestPayload, region string, streamName string, shardId string) {
 
 	fmt.Println("Streaming from Kinesis started....")
 
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String(region)},
 	)
-
 	if err != nil {
 		fmt.Println("Error creating session,", err)
 		return
 	}
 
 	svc := kinesis.New(sess)
-
 	shardIteratorArgs := &kinesis.GetShardIteratorInput{
 		ShardId:           aws.String(shardId),
 		ShardIteratorType: aws.String("TRIM_HORIZON"),
@@ -30,7 +46,6 @@ func readFromKinesisStream(ch chan string, region string, streamName string, sha
 	}
 
 	shardIteratorRes, err := svc.GetShardIterator(shardIteratorArgs)
-
 	if err != nil {
 		fmt.Println("Error getting shard iterator,", err)
 		return
@@ -43,14 +58,23 @@ func readFromKinesisStream(ch chan string, region string, streamName string, sha
 
 	for {
 		getRecordsRes, err := svc.GetRecords(getRecordsArgs)
-
 		if err != nil {
 			fmt.Println("Error getting records,", err)
 			return
 		}
 
 		for _, record := range getRecordsRes.Records {
-			ch <- string(record.Data)
+			m := make(map[string]interface{})
+			err := json.Unmarshal(record.Data, &m)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+
+			message := &MessageRequestPayload{}
+			message.SetData("BROADCAST", int64(m["pressure"].(float64)), m["temperature"].(float64), m["humidity"].(float64))
+
+			ch <- *message
 		}
 
 		if getRecordsRes.NextShardIterator != nil {
@@ -61,23 +85,35 @@ func readFromKinesisStream(ch chan string, region string, streamName string, sha
 	}
 }
 
-//func writeToWebSocket(ch chan string, url string) {
-//	c, _, err := websocket.DefaultDialer.Dial(url, nil)
-//	if err != nil {
-//		fmt.Println("Error dialing WebSocket,", err)
-//		return
-//	}
-//	defer c.Close()
-//
-//	for {
-//		message := <-ch
-//		err := c.WriteMessage(websocket.TextMessage, []byte(message))
-//		if err != nil {
-//			fmt.Println("Error writing to WebSocket,", err)
-//			return
-//		}
-//	}
-//}
+func writeToWebSocket(ch chan MessageRequestPayload, url string) {
+
+	fmt.Println("Publishing to WebSocket started....")
+
+	c, _, err := websocket.DefaultDialer.Dial(url, nil)
+	if err != nil {
+		fmt.Println("Error dialing WebSocket,", err)
+		return
+	}
+	defer c.Close()
+
+	for {
+		message := <-ch
+		log.Printf("Received Data from Kinesis: %v\n", message.Payload.Message["pressure"])
+
+		payloadJSON, err := json.Marshal(message)
+		if err != nil {
+			log.Printf("Failed to marshal payload: %v", err)
+			return
+		}
+
+		payload := []byte(payloadJSON)
+		err = c.WriteMessage(websocket.TextMessage, payload)
+		if err != nil {
+			fmt.Println("Error writing to WebSocket,", err)
+			return
+		}
+	}
+}
 
 func main() {
 
@@ -85,16 +121,12 @@ func main() {
 	streamName := "iot-topic-rule-kinesis-stream"
 	shardId := "shardId-000000000000"
 
-	//wsApiUrl := ""
+	wsApiUrl := "wss://ws.iot.dhanuzone.com/"
 
-	ch := make(chan string)
+	ch := make(chan MessageRequestPayload)
 
 	go readFromKinesisStream(ch, region, streamName, shardId)
-	//go writeToWebSocket(ch, "ws://my.websocket.url")
-
-	for data := range ch {
-		fmt.Println(data)
-	}
+	go writeToWebSocket(ch, wsApiUrl)
 
 	select {}
 }

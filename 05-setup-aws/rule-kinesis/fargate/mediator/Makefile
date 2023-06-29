@@ -5,8 +5,7 @@ install:
 
 # TODO
 run:
-	rm -f main
-	rm -f trigger.zip
+	go run main.go
 
 # TODO
 package:

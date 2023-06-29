@@ -42,9 +42,9 @@ func Chat(ctx context.Context, event events.APIGatewayWebsocketProxyRequest) (ev
 		return events.APIGatewayProxyResponse{}, err
 	}
 
-	response := model.Response[model.PongResponsePayload]{
+	response := model.Response[model.ChatResponsePayload]{
 		Action:   chatAction,
-		Response: model.PongResponsePayload{},
+		Response: model.ChatResponsePayload{},
 	}
 
 	content, err := json.Marshal(response)

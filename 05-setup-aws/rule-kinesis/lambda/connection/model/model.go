@@ -15,13 +15,13 @@ type Response[T any] struct {
 	Response T      `json:"response"`
 }
 
-type PingRequestPayload struct{}
-type PongResponsePayload struct{}
+type ChatRequestPayload struct{}
+type ChatResponsePayload struct{}
 
 type MessageRequestPayload struct {
-	Message string `json:"message"`
+	Message map[string]string `json:"message"`
 }
 
 type MessageResponsePayload struct {
-	Message string `json:"message"`
+	Message map[string]string `json:"message"`
 }
