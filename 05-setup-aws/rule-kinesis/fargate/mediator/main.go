@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/kinesis"
 	"github.com/gorilla/websocket"
 	"log"
+	"os"
 	"time"
 )
 
@@ -28,20 +30,34 @@ func (m *MessageRequestPayload) SetData(action string, pressure int64, temperatu
 
 func readFromKinesisStream(ch chan MessageRequestPayload, region string, streamName string, shardId string) {
 
-	fmt.Println("Streaming from Kinesis started....")
+	log.Println("Streaming from Kinesis started....")
 
-	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String(region)},
-	)
+	accessKey := os.Getenv("AWS_ACCESS_KEY_ID")
+	secretKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
+
+	var sess *session.Session
+	var err error
+
+	if accessKey != "" && secretKey != "" {
+		sess, err = session.NewSession(&aws.Config{
+			Region:      aws.String(region),
+			Credentials: credentials.NewStaticCredentials(accessKey, secretKey, ""),
+		})
+	} else {
+		log.Println("Got into the correct session block")
+		sess, err = session.NewSession(&aws.Config{
+			Region: aws.String(region),
+		})
+	}
 	if err != nil {
-		fmt.Println("Error creating session,", err)
+		log.Println("Error creating session,", err)
 		return
 	}
 
 	svc := kinesis.New(sess)
 	shardIteratorArgs := &kinesis.GetShardIteratorInput{
 		ShardId:           aws.String(shardId),
-		ShardIteratorType: aws.String("TRIM_HORIZON"),
+		ShardIteratorType: aws.String("LATEST"),
 		StreamName:        aws.String(streamName),
 	}
 
@@ -59,7 +75,7 @@ func readFromKinesisStream(ch chan MessageRequestPayload, region string, streamN
 	for {
 		getRecordsRes, err := svc.GetRecords(getRecordsArgs)
 		if err != nil {
-			fmt.Println("Error getting records,", err)
+			log.Println("Error getting records,", err)
 			return
 		}
 
@@ -73,6 +89,7 @@ func readFromKinesisStream(ch chan MessageRequestPayload, region string, streamN
 
 			message := &MessageRequestPayload{}
 			message.SetData("BROADCAST", int64(m["pressure"].(float64)), m["temperature"].(float64), m["humidity"].(float64))
+			log.Println("Values are ", int64(m["pressure"].(float64)), m["temperature"].(float64), m["humidity"].(float64))
 
 			ch <- *message
 		}
@@ -98,7 +115,6 @@ func writeToWebSocket(ch chan MessageRequestPayload, url string) {
 
 	for {
 		message := <-ch
-		log.Printf("Received Data from Kinesis: %v\n", message.Payload.Message["pressure"])
 
 		payloadJSON, err := json.Marshal(message)
 		if err != nil {

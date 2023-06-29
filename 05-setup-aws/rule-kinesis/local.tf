@@ -26,6 +26,37 @@ locals {
     }
   }
 
+  # container registry
+  ecr = {
+    name = "mediator"
+    image_tag_mutability = "MUTABLE"
+    scan_on_push = true
+  }
+
+  # fargate
+  cluster = {
+    name = "iot-mediator-cluster"
+  }
+
+  task = {
+    family                   = "iot-mediator-task"
+    cpu                      = "1024"
+    memory                   = "2048"
+    network_mode             = "awsvpc"
+    requires_compatibilities = ["FARGATE"]
+    name = "iot-mediator-image"
+    image = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/mediator:latest"
+    essential = true
+  }
+
+  service = {
+    name = "iot-mediator-service"
+    desired_count   = 1
+    launch_type = "FARGATE"
+    subnets = slice(data.aws_subnets.default.ids, 0, 2)
+    assign_public_ip = false
+  }
+
   # api gateway
   api = {
     name = "iot_ws_api_gateway"

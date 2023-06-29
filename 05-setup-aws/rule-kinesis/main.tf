@@ -3,7 +3,24 @@
 ########
 
 data "aws_caller_identity" "current" {}
+
 data "aws_region" "current" {}
+
+data "aws_vpc" "default" {
+  cidr_block = "172.31.0.0/16"
+}
+
+data "aws_subnets" "default" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+}
+
+data "aws_security_group" "default" {
+  vpc_id = data.aws_vpc.default.id
+  name   = "default"
+}
 
 
 #############
@@ -164,6 +181,96 @@ resource "aws_iam_role_policy" "api_gateway_log" {
   name   = "IotAPIGatewayLogPolicy"
   role   = aws_iam_role.api_gateway.id
   policy = data.aws_iam_policy_document.api_gateway_logs.json
+}
+
+# fargate task
+data "aws_iam_policy_document" "fargate" {
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["ecs-tasks.amazonaws.com"]
+    }
+  }
+}
+
+data "aws_iam_policy_document" "fargate_ecs_policy" {
+  statement {
+    actions = [
+      "ecr:GetAuthorizationToken",
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:BatchGetImage",
+    ]
+
+    resources = ["*"]
+  }
+}
+
+data "aws_iam_policy_document" "fargate_kinesis_policy" {
+  statement {
+    actions = [
+      "kinesis:Get*",
+      "kinesis:DescribeStreamSummary"
+    ]
+
+    resources = [
+      aws_kinesis_stream.stream.arn
+    ]
+  }
+}
+
+data "aws_iam_policy_document" "fargate_kinesis_all_policy" {
+  statement {
+    actions = [
+      "kinesis:ListStreams"
+    ]
+
+    resources = ["*"]
+  }
+}
+
+data "aws_iam_policy_document" "fargate_log_policy" {
+  statement {
+    actions = [
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+    ]
+
+    resources = [
+      "arn:aws:logs:*:*:*",
+    ]
+  }
+}
+
+resource "aws_iam_role" "fargate" {
+  name               = "IotFargateExecutionRole"
+  assume_role_policy = data.aws_iam_policy_document.fargate.json
+}
+
+resource "aws_iam_role_policy" "fargate_ecs" {
+  name   = "IotFargateEcsPolicy"
+  role   = aws_iam_role.fargate.id
+  policy = data.aws_iam_policy_document.fargate_ecs_policy.json
+}
+
+resource "aws_iam_role_policy" "fargate_kinesis" {
+  name   = "IotFargateKinesisPolicy"
+  role   = aws_iam_role.fargate.id
+  policy = data.aws_iam_policy_document.fargate_kinesis_policy.json
+}
+
+resource "aws_iam_role_policy" "fargate_kinesis_all" {
+  name   = "IotFargateKinesisAllPolicy"
+  role   = aws_iam_role.fargate.id
+  policy = data.aws_iam_policy_document.fargate_kinesis_all_policy.json
+}
+
+resource "aws_iam_role_policy" "fargate_log" {
+  name   = "IotFargateLogPolicy"
+  role   = aws_iam_role.fargate.id
+  policy = data.aws_iam_policy_document.fargate_log_policy.json
 }
 
 
@@ -380,9 +487,65 @@ resource "aws_apigatewayv2_api_mapping" "ws_iot" {
 }
 
 
-##############
-# TOPIC RULE #
-##############
+######################
+# CONTAINER REGISTRY #
+######################
+
+resource "aws_ecr_repository" "mediator" {
+  name                 = local.ecr.name
+  image_tag_mutability = local.ecr.image_tag_mutability
+
+  image_scanning_configuration {
+    scan_on_push = local.ecr.scan_on_push
+  }
+}
+
+####################
+# FARGATE INSTANCE #
+####################
+
+resource "aws_ecs_cluster" "mediator" {
+  name = "iot_mediator"
+
+  setting {
+    name  = "containerInsights"
+    value = "enabled"
+  }
+}
+
+resource "aws_ecs_task_definition" "mediator" {
+  family                   = local.task.family
+  cpu                      = local.task.cpu
+  memory                   = local.task.memory
+  network_mode             = local.task.network_mode
+  requires_compatibilities = local.task.requires_compatibilities
+  execution_role_arn       = aws_iam_role.fargate.arn
+  task_role_arn            = aws_iam_role.fargate.arn
+
+  container_definitions = jsonencode([{
+    name      = local.task.name
+    image     = local.task.image
+    essential = local.task.essential
+  }])
+}
+
+resource "aws_ecs_service" "mediator" {
+  name            = local.service.name
+  cluster         = aws_ecs_cluster.mediator.id
+  task_definition = aws_ecs_task_definition.mediator.arn
+  desired_count   = local.service.desired_count
+  launch_type     = local.service.launch_type
+
+  network_configuration {
+    subnets = local.service.subnets
+    assign_public_ip = true
+    security_groups = [data.aws_security_group.default.id]
+  }
+}
+
+##################
+# KINESIS STREAM #
+##################
 
 resource "aws_kinesis_stream" "stream" {
   name             = local.kinesis.name

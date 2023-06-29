@@ -5,3 +5,7 @@ output "api_gateway_url" {
 output "ws_api_gateway_url" {
   value = module.rule-kinesis.ws_api_gateway_uri
 }
+
+output "container_registry_url" {
+  value       = module.rule-kinesis.container_registry_url
+}
