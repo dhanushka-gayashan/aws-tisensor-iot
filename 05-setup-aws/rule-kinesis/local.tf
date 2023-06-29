@@ -26,11 +26,27 @@ locals {
     }
   }
 
+  deployment = {
+    name        = "IotFargateDeployment"
+    file        = "./lambda/deployment/deployment.zip"
+    role        = aws_iam_role.deployment.arn
+    runtime     = "go1.x"
+    handler     = "main"
+    memory      = 128
+    timeout     = 180
+    concurrency = 1
+    env_vars    = {
+      "REGION" = "us-east-1"
+      "CLUSTER" = aws_ecs_cluster.mediator.name
+      "SERVICE" = aws_ecs_service.mediator.name
+    }
+  }
+
   # container registry
   ecr = {
-    name = "mediator"
+    name                 = "mediator"
     image_tag_mutability = "MUTABLE"
-    scan_on_push = true
+    scan_on_push         = true
   }
 
   # fargate
@@ -44,17 +60,23 @@ locals {
     memory                   = "2048"
     network_mode             = "awsvpc"
     requires_compatibilities = ["FARGATE"]
-    name = "iot-mediator-image"
-    image = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/mediator:latest"
-    essential = true
+    name                     = "iot-mediator-image"
+    image                    = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/mediator:latest"
+    essential                = true
   }
 
   service = {
-    name = "iot-mediator-service"
-    desired_count   = 1
-    launch_type = "FARGATE"
-    subnets = slice(data.aws_subnets.default.ids, 0, 2)
+    name             = "iot-mediator-service"
+    desired_count    = 1
+    launch_type      = "FARGATE"
+    subnets          = slice(data.aws_subnets.default.ids, 0, 2)
     assign_public_ip = false
+  }
+
+  trigger = {
+    name            = "iot-ecr-deployment"
+    description     = "Triggers when a new image is pushed to ECR"
+    repository-name = ["mediator"]
   }
 
   # api gateway

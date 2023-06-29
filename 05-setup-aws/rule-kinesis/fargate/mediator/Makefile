@@ -19,7 +19,7 @@ ACCOUNT_ID=516867159723
 REGION=us-east-1
 REPO_NAME=mediator
 IMAGE_TAG=latest
-BUILD_NUMBER=1.0.0
+BUILD_NUMBER=1.0.3
 
 login:
 	aws ecr get-login-password --region $(REGION) | docker login --username AWS --password-stdin $(ACCOUNT_ID).dkr.ecr.$(REGION).amazonaws.com

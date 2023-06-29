@@ -44,7 +44,6 @@ func readFromKinesisStream(ch chan MessageRequestPayload, region string, streamN
 			Credentials: credentials.NewStaticCredentials(accessKey, secretKey, ""),
 		})
 	} else {
-		log.Println("Got into the correct session block")
 		sess, err = session.NewSession(&aws.Config{
 			Region: aws.String(region),
 		})
@@ -89,8 +88,6 @@ func readFromKinesisStream(ch chan MessageRequestPayload, region string, streamN
 
 			message := &MessageRequestPayload{}
 			message.SetData("BROADCAST", int64(m["pressure"].(float64)), m["temperature"].(float64), m["humidity"].(float64))
-			log.Println("Values are ", int64(m["pressure"].(float64)), m["temperature"].(float64), m["humidity"].(float64))
-
 			ch <- *message
 		}
 
