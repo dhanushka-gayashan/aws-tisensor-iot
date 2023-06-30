@@ -24,6 +24,20 @@ func SaveMobileNumber(req events.APIGatewayProxyRequest, tableName string, clien
 	return apiResponse(http.StatusCreated, result)
 }
 
+func DeleteMobileNumber(req events.APIGatewayProxyRequest, tableName string, client dynamodbiface.DynamoDBAPI) (
+	*events.APIGatewayProxyResponse, error,
+) {
+	mNumber := req.QueryStringParameters["number"]
+	if len(mNumber) > 0 {
+		err := mobile.DeleteMobileNumber(mNumber, tableName, client)
+		if err != nil {
+			return apiResponse(http.StatusBadRequest, ErrorBody{aws.String(err.Error())})
+		}
+		return apiResponse(http.StatusOK, nil)
+	}
+	return apiResponse(http.StatusNotFound, nil)
+}
+
 func OptionsMethod() (*events.APIGatewayProxyResponse, error) {
 	return apiResponse(http.StatusOK, nil)
 }

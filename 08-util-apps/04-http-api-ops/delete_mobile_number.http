@@ -1,0 +1,7 @@
+### Delete Mobile Number from the System ###
+
+DELETE https://api.iot.dhanuzone.com/mobile?number=%2B642102995529 HTTP/1.1
+
+#########################
+
+

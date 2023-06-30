@@ -39,3 +39,21 @@ func SaveMobileNumber(req events.APIGatewayProxyRequest, tableName string, clien
 
 	return &mn, nil
 }
+
+func DeleteMobileNumber(mNumber string, tableName string, dynaClient dynamodbiface.DynamoDBAPI) error {
+	input := &dynamodb.DeleteItemInput{
+		Key: map[string]*dynamodb.AttributeValue{
+			"mobile": {
+				S: aws.String(mNumber),
+			},
+		},
+		TableName: aws.String(tableName),
+	}
+
+	_, err := dynaClient.DeleteItem(input)
+	if err != nil {
+		return errors.New("could not delete item")
+	}
+
+	return nil
+}

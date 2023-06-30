@@ -31,6 +31,8 @@ func handler(req events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse
 	switch req.HTTPMethod {
 	case "POST":
 		return handlers.SaveMobileNumber(req, tableName, client)
+	case "DELETE":
+		return handlers.DeleteMobileNumber(req, tableName, client)
 	case "OPTIONS":
 		return handlers.OptionsMethod()
 	default:
