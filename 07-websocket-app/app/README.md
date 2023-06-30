@@ -1,20 +1,16 @@
-### Install Libraries
+### Install require packages
 ```shell
-npm install @mui/material @emotion/react @emotion/styled
-npm install @mui/icons-material
-npm install react-google-charts
-npm install uuid
+make install
 ```
 
 
-### Run App
+### Run locally
 ```shell
-npm start
+make run
 ```
 
 
-### Build App
+### Build executable package
 ```shell
-rm -rf build
-npm run build
+make build
 ```
