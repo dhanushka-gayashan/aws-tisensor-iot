@@ -63,9 +63,39 @@ const DataVisualizationComponent = () => {
     return (
         <StyledContainer>
             <Box display="flex" alignItems="center" justifyContent="center" gap={2}>
-                <GaugeChartComponent title="Humidity" data={Number(message?.humidity) || 0} />
-                <GaugeChartComponent title="Pressure" data={Number(message?.pressure) || 0} />
-                <GaugeChartComponent title="Temperature" data={Number(message?.temperature) || 0} />
+                <GaugeChartComponent
+                    title="Humidity"
+                    data={Number(message?.humidity) || 0}
+                    redFrom={50}
+                    redTo={100}
+                    yellowFrom={0}
+                    yellowTo={30}
+                    greenFrom={30}
+                    greenTo={50}
+                    max={100}
+                />
+                <GaugeChartComponent
+                    title="Pressure"
+                    data={Number(message?.pressure) || 0}
+                    redFrom={50}
+                    redTo={100}
+                    yellowFrom={0}
+                    yellowTo={25}
+                    greenFrom={25}
+                    greenTo={50}
+                    max={100}
+                />
+                <GaugeChartComponent
+                    title="Temperature"
+                    data={Number(message?.temperature) || 0}
+                    redFrom={35}
+                    redTo={50}
+                    yellowFrom={25}
+                    yellowTo={35}
+                    greenFrom={0}
+                    greenTo={25}
+                    max={50}
+                />
             </Box>
             <Box mt={2}>
                 <Button variant="contained" onClick={handleRefreshConnection}>
@@ -77,5 +107,4 @@ const DataVisualizationComponent = () => {
 };
 
 export default DataVisualizationComponent;
-
 
