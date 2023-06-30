@@ -29,7 +29,6 @@ func (m *MessageRequestPayload) SetData(action string, pressure int64, temperatu
 }
 
 func readFromKinesisStream(ch chan MessageRequestPayload, region string, streamName string, shardId string) {
-
 	log.Println("Streaming from Kinesis started....")
 
 	accessKey := os.Getenv("AWS_ACCESS_KEY_ID")
@@ -75,7 +74,7 @@ func readFromKinesisStream(ch chan MessageRequestPayload, region string, streamN
 		getRecordsRes, err := svc.GetRecords(getRecordsArgs)
 		if err != nil {
 			log.Println("Error getting records,", err)
-			return
+			continue // Retry fetching records instead of returning
 		}
 
 		for _, record := range getRecordsRes.Records {
@@ -100,7 +99,6 @@ func readFromKinesisStream(ch chan MessageRequestPayload, region string, streamN
 }
 
 func writeToWebSocket(ch chan MessageRequestPayload, url string) {
-
 	fmt.Println("Publishing to WebSocket started....")
 
 	c, _, err := websocket.DefaultDialer.Dial(url, nil)
@@ -110,30 +108,38 @@ func writeToWebSocket(ch chan MessageRequestPayload, url string) {
 	}
 	defer c.Close()
 
+	writeTimeout := 10 * time.Second // Adjust the timeout duration as needed
+
 	for {
 		message := <-ch
 
 		payloadJSON, err := json.Marshal(message)
 		if err != nil {
 			log.Printf("Failed to marshal payload: %v", err)
-			return
+			continue // Retry sending the message instead of returning
 		}
 
 		payload := []byte(payloadJSON)
 		err = c.WriteMessage(websocket.TextMessage, payload)
 		if err != nil {
 			fmt.Println("Error writing to WebSocket,", err)
-			return
+			// Attempt to reconnect to WebSocket
+			c, _, err = websocket.DefaultDialer.Dial(url, nil)
+			if err != nil {
+				fmt.Println("Error dialing WebSocket,", err)
+			}
+			continue // Retry sending the message instead of returning
 		}
+
+		// Reset write deadline
+		c.SetWriteDeadline(time.Now().Add(writeTimeout))
 	}
 }
 
 func main() {
-
 	region := "us-east-1"
 	streamName := "iot-topic-rule-kinesis-stream"
 	shardId := "shardId-000000000000"
-
 	wsApiUrl := "wss://ws.iot.dhanuzone.com/"
 
 	ch := make(chan MessageRequestPayload)
