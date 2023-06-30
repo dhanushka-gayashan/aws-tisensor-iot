@@ -382,32 +382,6 @@ resource "aws_lambda_permission" "connection_invocation" {
   source_arn    = "${aws_apigatewayv2_api.ws_iot.execution_arn}/*/*"
 }
 
-### deployment ###
-resource "aws_lambda_function" "deployment" {
-  function_name                  = local.deployment.name
-  handler                        = local.deployment.handler
-  runtime                        = local.deployment.runtime
-  role                           = local.deployment.role
-  filename                       = "${path.module}/${local.deployment.file}"
-  source_code_hash               = filebase64sha256("${path.module}/${local.deployment.file}")
-  memory_size                    = local.deployment.memory
-  timeout                        = local.deployment.timeout
-  reserved_concurrent_executions = local.deployment.concurrency
-}
-
-resource "aws_cloudwatch_log_group" "deployment" {
-  name              = "/aws/lambda/${aws_lambda_function.deployment.function_name}"
-  retention_in_days = 7
-}
-
-resource "aws_lambda_permission" "deployment" {
-  statement_id  = "AllowExecutionFromCloudWatch"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.deployment.function_name
-  principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.deployment.arn
-}
-
 
 ###########################
 # API GATEWAY CERTIFICATE #
@@ -627,7 +601,33 @@ resource "aws_ecs_service" "mediator" {
 # FARGATE DEPLOYMENT #
 ######################
 
-// TODO Not woking
+// TODO Not working
+### deployment ###
+resource "aws_lambda_function" "deployment" {
+  function_name                  = local.deployment.name
+  handler                        = local.deployment.handler
+  runtime                        = local.deployment.runtime
+  role                           = local.deployment.role
+  filename                       = "${path.module}/${local.deployment.file}"
+  source_code_hash               = filebase64sha256("${path.module}/${local.deployment.file}")
+  memory_size                    = local.deployment.memory
+  timeout                        = local.deployment.timeout
+  reserved_concurrent_executions = local.deployment.concurrency
+}
+
+resource "aws_cloudwatch_log_group" "deployment" {
+  name              = "/aws/lambda/${aws_lambda_function.deployment.function_name}"
+  retention_in_days = 7
+}
+
+resource "aws_lambda_permission" "deployment" {
+  statement_id  = "AllowExecutionFromCloudWatch"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.deployment.function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.deployment.arn
+}
+
 resource "aws_cloudwatch_event_rule" "deployment" {
   name        = local.trigger.name
   description = local.trigger.description
