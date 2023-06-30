@@ -66,24 +66,24 @@ const DataVisualizationComponent = () => {
                 <GaugeChartComponent
                     title="Humidity"
                     data={Number(message?.humidity) || 0}
-                    redFrom={50}
+                    redFrom={70}
                     redTo={100}
                     yellowFrom={0}
                     yellowTo={30}
                     greenFrom={30}
-                    greenTo={50}
+                    greenTo={70}
                     max={100}
                 />
                 <GaugeChartComponent
                     title="Pressure"
                     data={Number(message?.pressure) || 0}
-                    redFrom={50}
-                    redTo={100}
+                    redFrom={1000}
+                    redTo={1500}
                     yellowFrom={0}
-                    yellowTo={25}
-                    greenFrom={25}
-                    greenTo={50}
-                    max={100}
+                    yellowTo={500}
+                    greenFrom={500}
+                    greenTo={1000}
+                    max={1500}
                 />
                 <GaugeChartComponent
                     title="Temperature"

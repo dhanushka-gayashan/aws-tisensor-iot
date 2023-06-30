@@ -165,13 +165,13 @@ func SaveData(data ReceiveData) error {
 			Item:      av,
 			TableName: aws.String(outputTables["pressure"]),
 		}
-	} else if data.Temperature > 0.0 {
-		item := new(FloatData)
-		item.Uuid = uuid2.New().String()
-		item.Timestamp = data.Timestamp
-		item.Data = data.Temperature
+	} else if data.Temperature > 0.0 || data.Humidity > 0.0 {
+		tempItem := new(FloatData)
+		tempItem.Uuid = uuid2.New().String()
+		tempItem.Timestamp = data.Timestamp
+		tempItem.Data = data.Temperature
 
-		av, err := dynamodbattribute.MarshalMap(item)
+		av, err := dynamodbattribute.MarshalMap(tempItem)
 		if err != nil {
 			return err
 		}
@@ -180,13 +180,13 @@ func SaveData(data ReceiveData) error {
 			Item:      av,
 			TableName: aws.String(outputTables["temperature"]),
 		}
-	} else if data.Humidity > 0.0 {
-		item := new(FloatData)
-		item.Uuid = uuid2.New().String()
-		item.Timestamp = data.Timestamp
-		item.Data = data.Humidity
 
-		av, err := dynamodbattribute.MarshalMap(item)
+		humItem := new(FloatData)
+		humItem.Uuid = uuid2.New().String()
+		humItem.Timestamp = data.Timestamp
+		humItem.Data = data.Humidity
+
+		av, err = dynamodbattribute.MarshalMap(humItem)
 		if err != nil {
 			return err
 		}

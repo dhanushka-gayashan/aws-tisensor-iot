@@ -513,37 +513,37 @@ resource "aws_ecs_cluster" "mediator" {
   }
 }
 
-resource "aws_ecs_task_definition" "mediator" {
-  family                   = local.task.family
-  cpu                      = local.task.cpu
-  memory                   = local.task.memory
-  network_mode             = local.task.network_mode
-  requires_compatibilities = local.task.requires_compatibilities
-  execution_role_arn       = aws_iam_role.fargate.arn
-  task_role_arn            = aws_iam_role.fargate.arn
-
-  container_definitions = jsonencode([
-    {
-      name      = local.task.name
-      image     = local.task.image
-      essential = local.task.essential
-    }
-  ])
-}
-
-resource "aws_ecs_service" "mediator" {
-  name            = local.service.name
-  cluster         = aws_ecs_cluster.mediator.id
-  task_definition = aws_ecs_task_definition.mediator.arn
-  desired_count   = local.service.desired_count
-  launch_type     = local.service.launch_type
-
-  network_configuration {
-    subnets          = local.service.subnets
-    assign_public_ip = true
-    security_groups  = [data.aws_security_group.default.id]
-  }
-}
+#resource "aws_ecs_task_definition" "mediator" {
+#  family                   = local.task.family
+#  cpu                      = local.task.cpu
+#  memory                   = local.task.memory
+#  network_mode             = local.task.network_mode
+#  requires_compatibilities = local.task.requires_compatibilities
+#  execution_role_arn       = aws_iam_role.fargate.arn
+#  task_role_arn            = aws_iam_role.fargate.arn
+#
+#  container_definitions = jsonencode([
+#    {
+#      name      = local.task.name
+#      image     = local.task.image
+#      essential = local.task.essential
+#    }
+#  ])
+#}
+#
+#resource "aws_ecs_service" "mediator" {
+#  name            = local.service.name
+#  cluster         = aws_ecs_cluster.mediator.id
+#  task_definition = aws_ecs_task_definition.mediator.arn
+#  desired_count   = local.service.desired_count
+#  launch_type     = local.service.launch_type
+#
+#  network_configuration {
+#    subnets          = local.service.subnets
+#    assign_public_ip = true
+#    security_groups  = [data.aws_security_group.default.id]
+#  }
+#}
 
 
 ##################

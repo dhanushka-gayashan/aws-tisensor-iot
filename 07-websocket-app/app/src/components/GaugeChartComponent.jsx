@@ -1,7 +1,15 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { Chart } from 'react-google-charts';
 
-const GaugeChartComponent = ({ title, data, max, redFrom, redTo, yellowFrom, yellowTo, greenFrom, greenTo }) => {
+const GaugeChartComponent = ({ title, max, redFrom, redTo, yellowFrom, yellowTo, greenFrom, greenTo, data: initialData }) => {
+    const [data, setData] = useState(0);
+
+    const updateData = (value) => {
+        if (value > 0) {
+            setData(value);
+        }
+    };
+
     const chartData = [
         ['Label', 'Value'],
         [title, data],
@@ -19,6 +27,10 @@ const GaugeChartComponent = ({ title, data, max, redFrom, redTo, yellowFrom, yel
         greenTo: greenTo,
         minorTicks: 5,
     };
+
+    React.useEffect(() => {
+        updateData(initialData);
+    }, [initialData]);
 
     return (
         <Chart

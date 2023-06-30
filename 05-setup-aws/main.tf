@@ -34,7 +34,7 @@ module "rule-kinesis" {
   source         = "./rule-kinesis"
   region         = var.region
   hosted_zone_id = data.aws_route53_zone.main.zone_id
-  enable         = true
+  enable         = false
 }
 
 # TODO: Find how to acquire ws connection id for publish lambda
