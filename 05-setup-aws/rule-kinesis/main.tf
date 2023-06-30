@@ -132,57 +132,6 @@ resource "aws_iam_role_policy" "connection_log" {
   policy = data.aws_iam_policy_document.connection_log.json
 }
 
-# deployment
-data "aws_iam_policy_document" "deployment_assume" {
-  statement {
-    effect  = "Allow"
-    actions = ["sts:AssumeRole"]
-    principals {
-      type        = "Service"
-      identifiers = ["lambda.amazonaws.com"]
-    }
-  }
-}
-
-data "aws_iam_policy_document" "deployment_ecs" {
-  statement {
-    effect  = "Allow"
-    actions = [
-      "ecs:UpdateService"
-    ]
-    resources = ["*"]
-  }
-}
-
-data "aws_iam_policy_document" "deployment_log" {
-  statement {
-    effect  = "Allow"
-    actions = [
-      "logs:CreateLogGroup",
-      "logs:CreateLogStream",
-      "logs:PutLogEvents",
-    ]
-    resources = ["arn:aws:logs:*:*:*"]
-  }
-}
-
-resource "aws_iam_role" "deployment" {
-  name               = "IotFargateDeploymentLambdaRole"
-  assume_role_policy = data.aws_iam_policy_document.deployment_assume.json
-}
-
-resource "aws_iam_role_policy" "deployment_ecs" {
-  name   = "IotFargateDeploymentLambdaECSPolicy"
-  role   = aws_iam_role.connection.id
-  policy = data.aws_iam_policy_document.deployment_ecs.json
-}
-
-resource "aws_iam_role_policy" "deployment_log" {
-  name   = "IotFargateDeploymentLambdaLogPolicy"
-  role   = aws_iam_role.connection.id
-  policy = data.aws_iam_policy_document.deployment_log.json
-}
-
 # api gateway
 data "aws_iam_policy_document" "api_gateway_assume" {
   statement {
@@ -594,58 +543,6 @@ resource "aws_ecs_service" "mediator" {
     assign_public_ip = true
     security_groups  = [data.aws_security_group.default.id]
   }
-}
-
-
-######################
-# FARGATE DEPLOYMENT #
-######################
-
-// TODO Not working
-### deployment ###
-resource "aws_lambda_function" "deployment" {
-  function_name                  = local.deployment.name
-  handler                        = local.deployment.handler
-  runtime                        = local.deployment.runtime
-  role                           = local.deployment.role
-  filename                       = "${path.module}/${local.deployment.file}"
-  source_code_hash               = filebase64sha256("${path.module}/${local.deployment.file}")
-  memory_size                    = local.deployment.memory
-  timeout                        = local.deployment.timeout
-  reserved_concurrent_executions = local.deployment.concurrency
-}
-
-resource "aws_cloudwatch_log_group" "deployment" {
-  name              = "/aws/lambda/${aws_lambda_function.deployment.function_name}"
-  retention_in_days = 7
-}
-
-resource "aws_lambda_permission" "deployment" {
-  statement_id  = "AllowExecutionFromCloudWatch"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.deployment.function_name
-  principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.deployment.arn
-}
-
-resource "aws_cloudwatch_event_rule" "deployment" {
-  name        = local.trigger.name
-  description = local.trigger.description
-
-  event_pattern = jsonencode({
-    source      = ["aws.ecr"]
-    detail-type = ["ECR Image Action"]
-    detail      = {
-      repository-name = local.trigger.repository-name
-      action-type     = ["PUSH"]
-    }
-  })
-}
-
-resource "aws_cloudwatch_event_target" "deployment" {
-  rule      = aws_cloudwatch_event_rule.deployment.name
-  target_id = aws_lambda_function.deployment.function_name
-  arn       = aws_lambda_function.deployment.arn
 }
 
 

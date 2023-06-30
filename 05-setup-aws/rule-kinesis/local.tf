@@ -26,22 +26,6 @@ locals {
     }
   }
 
-  deployment = {
-    name        = "IotFargateDeployment"
-    file        = "./lambda/deployment/deployment.zip"
-    role        = aws_iam_role.deployment.arn
-    runtime     = "go1.x"
-    handler     = "main"
-    memory      = 128
-    timeout     = 180
-    concurrency = 1
-    env_vars    = {
-      "REGION" = "us-east-1"
-      "CLUSTER" = aws_ecs_cluster.mediator.name
-      "SERVICE" = aws_ecs_service.mediator.name
-    }
-  }
-
   # container registry
   ecr = {
     name                 = "mediator"
