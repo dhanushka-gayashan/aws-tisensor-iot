@@ -1,15 +1,4 @@
 locals {
-  # timestream
-  database = {
-    name = "iot"
-  }
-
-  table = {
-    name = "sensor"
-    memory_retention_hours = 1
-    magnetic_retention_days = 1
-  }
-
   # grafana
   grafana_user = {
     email        = "dhanukdg@gmail.com"
@@ -26,6 +15,18 @@ locals {
     authentication_providers = ["AWS_SSO"]
     permission_type          = "SERVICE_MANAGED"
   }
+
+  # timestream
+  database = {
+    name = "iot"
+  }
+
+  table = {
+    name = "sensor"
+    memory_retention_hours = 1
+    magnetic_retention_days = 1
+  }
+
 
   # topic rule
   rule = {

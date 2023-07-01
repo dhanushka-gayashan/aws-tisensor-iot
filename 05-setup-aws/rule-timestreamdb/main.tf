@@ -22,20 +22,12 @@ data "aws_iam_policy_document" "iot_topic_rule_assume" {
   }
 }
 
-data "aws_iam_policy_document" "iot_topic_rule_write" {
+data "aws_iam_policy_document" "iot_topic_rule" {
   statement {
     effect  = "Allow"
     actions = [
+      "timestream:DescribeDatabase",
       "timestream:WriteRecords",
-    ]
-    resources = [aws_timestreamwrite_table.sensor.arn]
-  }
-}
-
-data "aws_iam_policy_document" "iot_topic_rule_describe" {
-  statement {
-    effect  = "Allow"
-    actions = [
       "timestream:DescribeEndpoints",
     ]
     resources = ["*"]
@@ -47,16 +39,10 @@ resource "aws_iam_role" "iot_topic_rule" {
   assume_role_policy = data.aws_iam_policy_document.iot_topic_rule_assume.json
 }
 
-resource "aws_iam_role_policy" "iot_topic_rule_write" {
-  name   = "IotTopicRuleTimestreamWritePolicy"
-  role   = aws_iam_role.iot_topic_rule.id
-  policy = data.aws_iam_policy_document.iot_topic_rule_write.json
-}
-
-resource "aws_iam_role_policy" "iot_topic_rule_describe" {
+resource "aws_iam_role_policy" "iot_topic_rule" {
   name   = "IotTopicRuleTimestreamDescribePolicy"
   role   = aws_iam_role.iot_topic_rule.id
-  policy = data.aws_iam_policy_document.iot_topic_rule_describe.json
+  policy = data.aws_iam_policy_document.iot_topic_rule.json
 }
 
 # grafana workspace
@@ -134,25 +120,6 @@ resource "aws_iam_role_policy" "grafana_logs" {
 }
 
 
-#################
-# TIMESTREAM DB #
-#################
-
-resource "aws_timestreamwrite_database" "iot" {
-  database_name = local.database.name
-}
-
-resource "aws_timestreamwrite_table" "sensor" {
-  database_name = aws_timestreamwrite_database.iot.database_name
-  table_name    = local.table.name
-
-  retention_properties {
-    memory_store_retention_period_in_hours  = local.table.memory_retention_hours
-    magnetic_store_retention_period_in_days = local.table.magnetic_retention_days
-  }
-}
-
-
 ###########
 # GRAFANA #
 ###########
@@ -190,6 +157,25 @@ resource "aws_grafana_role_association" "iot" {
   role         = "ADMIN"
   user_ids     = [aws_identitystore_user.grafana.user_id]
   workspace_id = aws_grafana_workspace.iot.id
+}
+
+
+#################
+# TIMESTREAM DB #
+#################
+
+resource "aws_timestreamwrite_database" "iot" {
+  database_name = local.database.name
+}
+
+resource "aws_timestreamwrite_table" "sensor" {
+  database_name = aws_timestreamwrite_database.iot.database_name
+  table_name    = local.table.name
+
+  retention_properties {
+    memory_store_retention_period_in_hours  = local.table.memory_retention_hours
+    magnetic_store_retention_period_in_days = local.table.magnetic_retention_days
+  }
 }
 
 

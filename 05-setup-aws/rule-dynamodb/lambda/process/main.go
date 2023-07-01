@@ -165,20 +165,30 @@ func SaveData(data ReceiveData) error {
 			Item:      av,
 			TableName: aws.String(outputTables["pressure"]),
 		}
-	} else if data.Temperature > 0.0 || data.Humidity > 0.0 {
+
+		_, err = dynaClient.PutItem(input)
+		if err != nil {
+			return err
+		}
+	} else if data.Temperature > 0 || data.Humidity > 0 {
 		tempItem := new(FloatData)
 		tempItem.Uuid = uuid2.New().String()
 		tempItem.Timestamp = data.Timestamp
 		tempItem.Data = data.Temperature
 
-		av, err := dynamodbattribute.MarshalMap(tempItem)
+		tmp, err := dynamodbattribute.MarshalMap(tempItem)
 		if err != nil {
 			return err
 		}
 
 		input = &dynamodb.PutItemInput{
-			Item:      av,
+			Item:      tmp,
 			TableName: aws.String(outputTables["temperature"]),
+		}
+
+		_, err = dynaClient.PutItem(input)
+		if err != nil {
+			return err
 		}
 
 		humItem := new(FloatData)
@@ -186,14 +196,19 @@ func SaveData(data ReceiveData) error {
 		humItem.Timestamp = data.Timestamp
 		humItem.Data = data.Humidity
 
-		av, err = dynamodbattribute.MarshalMap(humItem)
+		hum, err := dynamodbattribute.MarshalMap(humItem)
 		if err != nil {
 			return err
 		}
 
 		input = &dynamodb.PutItemInput{
-			Item:      av,
+			Item:      hum,
 			TableName: aws.String(outputTables["humidity"]),
+		}
+
+		_, err = dynaClient.PutItem(input)
+		if err != nil {
+			return err
 		}
 	} else if len(data.Accelerometer) > 0 {
 		item := new(MultiData)
@@ -212,6 +227,11 @@ func SaveData(data ReceiveData) error {
 			Item:      av,
 			TableName: aws.String(outputTables["accelerometer"]),
 		}
+
+		_, err = dynaClient.PutItem(input)
+		if err != nil {
+			return err
+		}
 	} else if len(data.Gyroscope) > 0 {
 		item := new(MultiData)
 		item.Uuid = uuid2.New().String()
@@ -228,6 +248,11 @@ func SaveData(data ReceiveData) error {
 		input = &dynamodb.PutItemInput{
 			Item:      av,
 			TableName: aws.String(outputTables["gyroscope"]),
+		}
+
+		_, err = dynaClient.PutItem(input)
+		if err != nil {
+			return err
 		}
 	} else if len(data.Magnetometer) > 0 {
 		item := new(MultiData)
@@ -246,15 +271,15 @@ func SaveData(data ReceiveData) error {
 			Item:      av,
 			TableName: aws.String(outputTables["magnetometer"]),
 		}
+
+		_, err = dynaClient.PutItem(input)
+		if err != nil {
+			return err
+		}
 	} else {
 		fmt.Println("Error: Fail to save following payload")
 		fmt.Printf("%+v\n", data)
 		return nil
-	}
-
-	_, err := dynaClient.PutItem(input)
-	if err != nil {
-		return err
 	}
 
 	return nil

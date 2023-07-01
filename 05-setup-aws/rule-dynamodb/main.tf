@@ -193,6 +193,7 @@ resource "aws_lambda_function" "process" {
   source_code_hash                = filebase64sha256("${path.module}/${local.lambda.filename}")
   memory_size                     = local.lambda.memory_size
   timeout                         = local.lambda.timeout
+  reserved_concurrent_executions  = local.lambda.concurrency
 
   lifecycle {
     create_before_destroy = true

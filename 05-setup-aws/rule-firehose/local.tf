@@ -5,14 +5,14 @@ locals {
       name = "/iot/firehose/pressure"
       description = "maximum air pressure"
       type = "String"
-      value = "1000"
+      value = "700"
     }
 
     temperature = {
       name = "/iot/firehose/temperature"
       description = "maximum air temperature"
       type = "String"
-      value = "20"
+      value = "15"
     }
   }
 

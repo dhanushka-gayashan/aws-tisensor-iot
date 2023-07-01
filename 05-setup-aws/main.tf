@@ -9,19 +9,19 @@ module "iot-core" {
   source = "./iot-core"
 }
 
-# iot-core rule : dynamodb rule
+# WORKING - DEVICE: iot-core rule : dynamodb rule
 module "rule-dynamodb" {
   source = "./rule-dynamodb"
   enable = false
 }
 
-# TODO: iot-core rule : timestream rule -> CREATE GRAFANA DASHBOARD
+# WORKING - DEVICE: iot-core rule : timestream rule -> CREATE GRAFANA DASHBOARD
 module "rule-timestream" {
   source = "./rule-timestreamdb"
-  enable = false
+  enable = true
 }
 
-# iot-core rule : firehose rule
+# WORKING - DEVICE: iot-core rule : firehose rule
 module "rule-firehose" {
   source         = "./rule-firehose"
   region         = var.region
@@ -29,7 +29,7 @@ module "rule-firehose" {
   enable         = false
 }
 
-# iot-core rule : kinesis
+# WORKING - DEVICE: iot-core rule : kinesis
 module "rule-kinesis" {
   source         = "./rule-kinesis"
   region         = var.region

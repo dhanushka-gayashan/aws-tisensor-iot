@@ -20,7 +20,7 @@ type SensorData struct {
 	Timestamp     string             `json:"timestamp"`
 	DeviceLabel   string             `json:"device_label"`
 	Location      string             `json:"location"`
-	Pressure      float32            `json:"pressure"`
+	Pressure      int32              `json:"pressure"`
 	Accelerometer map[string]float32 `json:"accelerometer"`
 	Gyroscope     map[string]float32 `json:"gyroscope"`
 	Magnetometer  map[string]float32 `json:"magnetometer"`
@@ -28,15 +28,21 @@ type SensorData struct {
 	Humidity      float32            `json:"humidity"`
 }
 
+var source = rand.NewSource(time.Now().UnixNano())
+
 func generatePressure(client mqtt.Client, dataCh chan<- SensorData) {
 	for {
-		time.Sleep(1 * time.Second)
+		//time.Sleep(500 * time.Millisecond)
+
+		random := rand.New(source)
+		min := int32(900)
+		max := int32(1200)
 
 		sensorData := SensorData{
 			Timestamp:     time.Now().UTC().Format(time.RFC3339),
 			DeviceLabel:   "tisensor",
 			Location:      "office",
-			Pressure:      rand.Float32()*300 + 900,
+			Pressure:      random.Int31n(max-min+1) + min,
 			Accelerometer: make(map[string]float32),
 			Gyroscope:     make(map[string]float32),
 			Magnetometer:  make(map[string]float32),
@@ -56,12 +62,16 @@ func generatePressure(client mqtt.Client, dataCh chan<- SensorData) {
 
 func generateAccelerometer(client mqtt.Client, dataCh chan<- SensorData) {
 	for {
-		time.Sleep(1 * time.Second)
+		//time.Sleep(500 * time.Millisecond)
+
+		random := rand.New(source)
+		min := float32(-1)
+		max := float32(5)
 
 		accelerometerData := map[string]float32{
-			"x": rand.Float32()*6 - 1, // generates a random x value between -1 and 5
-			"y": rand.Float32()*6 - 1, // generates a random y value between -1 and 5
-			"z": rand.Float32()*6 - 1, // generates a random z value between -1 and 5
+			"x": random.Float32()*(max-min) + min, // generates a random x value between -1 and 5
+			"y": random.Float32()*(max-min) + min, // generates a random y value between -1 and 5
+			"z": random.Float32()*(max-min) + min, // generates a random z value between -1 and 5
 		}
 
 		sensorData := SensorData{
@@ -87,12 +97,16 @@ func generateAccelerometer(client mqtt.Client, dataCh chan<- SensorData) {
 
 func generateGyroscope(client mqtt.Client, dataCh chan<- SensorData) {
 	for {
-		time.Sleep(1 * time.Second)
+		//time.Sleep(500 * time.Millisecond)
+
+		random := rand.New(source)
+		min := float32(-1)
+		max := float32(2)
 
 		gyroscopeData := map[string]float32{
-			"x": rand.Float32()*3 - 1, // generates a random x value between -1 and 2
-			"y": rand.Float32()*3 - 1, // generates a random y value between -1 and 2
-			"z": rand.Float32()*3 - 1, // generates a random z value between -1 and 2
+			"x": random.Float32()*(max-min) + min, // generates a random x value between -1 and 2
+			"y": random.Float32()*(max-min) + min, // generates a random y value between -1 and 2
+			"z": random.Float32()*(max-min) + min, // generates a random z value between -1 and 2
 		}
 
 		sensorData := SensorData{
@@ -118,12 +132,16 @@ func generateGyroscope(client mqtt.Client, dataCh chan<- SensorData) {
 
 func generateMagnetometer(client mqtt.Client, dataCh chan<- SensorData) {
 	for {
-		time.Sleep(1 * time.Second)
+		//time.Sleep(500 * time.Millisecond)
+
+		random := rand.New(source)
+		min := float32(-200)
+		max := float32(250)
 
 		magnetometerData := map[string]float32{
-			"x": rand.Float32()*450 - 200, // generates a random x value between -200 and 250
-			"y": rand.Float32()*450 - 200, // generates a random y value between -200 and 250
-			"z": rand.Float32()*450 - 200, // generates a random z value between -200 and 250
+			"x": random.Float32()*(max-min) + min, // generates a random x value between -200 and 250
+			"y": random.Float32()*(max-min) + min, // generates a random y value between -200 and 250
+			"z": random.Float32()*(max-min) + min, // generates a random z value between -200 and 250
 		}
 
 		sensorData := SensorData{
@@ -149,7 +167,15 @@ func generateMagnetometer(client mqtt.Client, dataCh chan<- SensorData) {
 
 func generateTemperatureAndHumidity(client mqtt.Client, dataCh chan<- SensorData) {
 	for {
-		time.Sleep(1 * time.Second)
+		//time.Sleep(500 * time.Millisecond)
+
+		randomTemp := rand.New(source)
+		minTemp := float32(15)
+		maxTemp := float32(30)
+
+		randomHume := rand.New(source)
+		minHume := float32(30)
+		maxHume := float32(100)
 
 		sensorData := SensorData{
 			Timestamp:     time.Now().UTC().Format(time.RFC3339),
@@ -158,8 +184,8 @@ func generateTemperatureAndHumidity(client mqtt.Client, dataCh chan<- SensorData
 			Accelerometer: make(map[string]float32),
 			Gyroscope:     make(map[string]float32),
 			Magnetometer:  make(map[string]float32),
-			Temperature:   rand.Float32()*15 + 15, // generates a random temperature between 15 and 30
-			Humidity:      rand.Float32() * 100,   // generates a random humidity between 0 and 100
+			Temperature:   randomTemp.Float32()*(maxTemp-minTemp) + minTemp, // generates a random temperature between 15 and 30
+			Humidity:      randomHume.Float32()*(maxHume-minHume) + minHume, // generates a random humidity between 0 and 100
 
 		}
 		dataCh <- sensorData

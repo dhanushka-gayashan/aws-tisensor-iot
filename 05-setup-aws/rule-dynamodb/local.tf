@@ -90,6 +90,7 @@ locals {
     filename      = "./lambda/process/process.zip"
     memory_size   = 128
     timeout       = 180
+    concurrency   = 100
   }
 
   # topic rule
