@@ -4,6 +4,7 @@ import theme from './theme';
 import MainContainer from "./components/MainContainer";
 import SubscriptionComponent from "./components/SubscriptionComponent";
 import DataVisualizationComponent from "./components/DataVisualizationComponent";
+import Footer from "./components/Footer";
 
 const App = () => {
     return (
@@ -13,6 +14,7 @@ const App = () => {
                 <div style={{ marginTop: '30px' }} /> {/* Add margin-top for spacing */}
                 <DataVisualizationComponent />
             </MainContainer>
+            <Footer />
         </ThemeProvider>
     );
 };

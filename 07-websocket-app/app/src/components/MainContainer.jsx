@@ -1,6 +1,7 @@
 import React from 'react';
 import { Container, Typography } from '@mui/material';
 import { Box } from '@mui/system';
+import Footer from "./Footer";
 
 const MainContainer = ({ children }) => {
     return (

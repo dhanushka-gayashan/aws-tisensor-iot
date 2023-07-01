@@ -15,7 +15,7 @@ module "rule-dynamodb" {
   enable = false
 }
 
-# WORKING - DEVICE: iot-core rule : timestream rule -> CREATE GRAFANA DASHBOARD
+# WORKING - DEVICE: iot-core rule : timestream rule
 module "rule-timestream" {
   source = "./rule-timestreamdb"
   enable = true
