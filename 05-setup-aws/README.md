@@ -18,9 +18,6 @@
 3. Follow the steps in `./rule-timestreamdb/dashboard/README.md` to create the ***Dashboard***
 
 
-## Create Sample Mobile Number
-Use `save_mobile_number.http` file
-
 
 ## Provision AWS Resource with Terraform
 
