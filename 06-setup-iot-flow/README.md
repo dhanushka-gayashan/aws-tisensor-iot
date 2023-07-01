@@ -1,6 +1,7 @@
 ## Configure the IOT Flow on Node-Red 
 
 ### Component Diagram
+
 ![Component Diagram](./pics/01-Component-Diagram.png)
 
 
